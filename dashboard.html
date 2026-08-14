@@ -20,568 +20,167 @@
     <style>
 
         /* =====================================================
-           DASHBOARD PAGE
+           QUESTION REVIEW
         ===================================================== */
 
-        * {
-            box-sizing: border-box;
+        .attempt-review {
+            margin-top: 18px;
         }
 
-        body {
-            margin: 0;
-        }
 
-        .db-page {
-            min-height: 100vh;
-            padding-bottom: 50px;
-        }
-
-        .db-navbar {
+        .review-toggle {
             width: 100%;
-            background: white;
-            border-bottom: 1px solid #eeeeee;
-
-            padding: 14px 6%;
-
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .db-logo {
-            margin: 0;
-            font-size: 21px;
-        }
-
-        .db-nav-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .db-nav-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-
-            padding: 9px 14px;
-
-            border-radius: 9px;
-
-            text-decoration: none;
-
+            border: none;
+            border-radius: 10px;
+            padding: 12px 15px;
+            background: #eef1ff;
+            color: #4038b5;
             font-weight: 700;
-            font-size: 14px;
-
-            background: #eeeeee;
-            color: #222;
+            cursor: pointer;
+            text-align: left;
+            font-size: 15px;
         }
 
-        .db-primary {
-            background: #6c63ff;
-            color: white;
+
+        .review-toggle:hover {
+            background: #e3e6ff;
         }
 
-        .db-container {
-            width: 100%;
-            max-width: 1100px;
 
-            margin: auto;
-
-            padding: 25px 15px;
+        .review-content {
+            display: none;
+            margin-top: 12px;
         }
 
-        /* =====================================================
-           ERROR / LOADING
-        ===================================================== */
 
-        .db-message {
-            background: white;
-
-            border-radius: 16px;
-
-            padding: 35px 20px;
-
-            text-align: center;
-
-            box-shadow:
-                0 5px 25px rgba(0, 0, 0, .06);
+        .review-content.show {
+            display: block;
         }
 
-        .db-message h2 {
-            margin-top: 0;
-        }
 
-        .db-message p {
-            color: #777;
-        }
-
-        /* =====================================================
-           QUIZ HEADER
-        ===================================================== */
-
-        .db-header {
-            background: white;
-
-            border-radius: 16px;
-
-            padding: 25px;
-
-            margin-bottom: 20px;
-
-            box-shadow:
-                0 5px 25px rgba(0, 0, 0, .06);
-        }
-
-        .db-header h1 {
-            margin: 0 0 7px;
-            font-size: 30px;
-        }
-
-        .db-description {
-            color: #777;
-            margin: 0 0 20px;
-            line-height: 1.5;
-        }
-
-        .db-code {
-            display: inline-block;
-
-            padding: 6px 10px;
-
-            background: #f0efff;
-
-            color: #554ce8;
-
-            border-radius: 7px;
-
-            font-family: monospace;
-
-            font-weight: 700;
-        }
-
-        /* =====================================================
-           SHARE
-        ===================================================== */
-
-        .db-share {
-            margin-top: 20px;
-
-            padding: 17px;
-
+        .review-question {
+            border: 1px solid #e0e0e0;
             border-radius: 12px;
-
-            background: #f5f5f5;
+            padding: 15px;
+            margin-bottom: 12px;
+            background: #fff;
         }
 
-        .db-share-label {
+
+        .review-question.correct {
+            border-left: 5px solid #168a4a;
+            background: #f5fcf7;
+        }
+
+
+        .review-question.wrong {
+            border-left: 5px solid #d93025;
+            background: #fff7f7;
+        }
+
+
+        .review-question.unanswered {
+            border-left: 5px solid #777;
+            background: #f7f7f7;
+        }
+
+
+        .review-status {
             font-weight: 800;
             margin-bottom: 8px;
         }
 
-        .db-share-row {
-            display: flex;
-            gap: 8px;
+
+        .review-status.correct {
+            color: #168a4a;
         }
 
-        .db-share-input {
-            flex: 1;
-            min-width: 0;
 
-            padding: 11px;
+        .review-status.wrong {
+            color: #d93025;
+        }
 
-            border: 1px solid #d6d6d6;
 
-            border-radius: 9px;
+        .review-status.unanswered {
+            color: #666;
+        }
 
-            background: white;
 
+        .review-question-text {
+            font-weight: 700;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+
+        .review-option {
+            padding: 9px 11px;
+            border-radius: 8px;
+            margin: 6px 0;
+            background: #f3f3f3;
+        }
+
+
+        .review-option.selected {
+            font-weight: 700;
+        }
+
+
+        .review-option.correct-answer {
+            border-left: 4px solid #168a4a;
+            background: #eaf8ef;
+            font-weight: 700;
+        }
+
+
+        .review-option.wrong-answer {
+            border-left: 4px solid #d93025;
+            background: #ffecec;
+            font-weight: 700;
+        }
+
+
+        .review-time {
+            margin-top: 12px;
+            color: #666;
             font-size: 14px;
         }
 
-        .db-button {
-            border: none;
 
-            border-radius: 9px;
-
-            padding: 11px 15px;
-
-            font-weight: 800;
-
-            cursor: pointer;
-
-            white-space: nowrap;
-        }
-
-        .db-copy {
-            background: #222;
-            color: white;
-        }
-
-        /* =====================================================
-           ACTIONS
-        ===================================================== */
-
-        .db-actions {
-            display: flex;
-
-            flex-wrap: wrap;
-
-            gap: 9px;
-
-            margin-top: 15px;
-        }
-
-        .db-actions a,
-        .db-actions button {
-            text-decoration: none;
-
-            display: inline-flex;
-
-            justify-content: center;
-            align-items: center;
-
-            padding: 11px 15px;
-
-            border-radius: 9px;
-
-            border: none;
-
-            font-weight: 800;
-
-            cursor: pointer;
-        }
-
-        .db-open {
-            background: #168a4a;
-            color: white;
-        }
-
-        .db-export {
-            background: #6c63ff;
-            color: white;
-        }
-
-        .db-delete {
-            background: #ffe8e8;
-            color: #a51d1d;
-        }
-
-        .db-refresh {
-            background: #eeeeee;
-            color: #222;
-        }
-
-        /* =====================================================
-           STATISTICS
-        ===================================================== */
-
-        .db-section-title {
-            margin: 25px 0 12px;
-            font-size: 22px;
-        }
-
-        .db-stats {
+        .review-summary {
             display: grid;
-
-            grid-template-columns:
-                repeat(4, 1fr);
-
-            gap: 13px;
-        }
-
-        .db-stat {
-            background: white;
-
-            border-radius: 14px;
-
-            padding: 20px;
-
-            box-shadow:
-                0 5px 20px rgba(0, 0, 0, .05);
-
-            text-align: center;
-        }
-
-        .db-stat span {
-            display: block;
-
-            color: #777;
-
-            font-size: 13px;
-
-            margin-bottom: 7px;
-        }
-
-        .db-stat strong {
-            display: block;
-
-            font-size: 25px;
-        }
-
-        /* =====================================================
-           PARTICIPANTS
-        ===================================================== */
-
-        .db-attempt {
-            background: white;
-
-            border-radius: 15px;
-
-            padding: 20px;
-
-            margin-bottom: 13px;
-
-            box-shadow:
-                0 5px 20px rgba(0, 0, 0, .05);
-        }
-
-        .db-attempt-top {
-            display: flex;
-
-            justify-content: space-between;
-
-            align-items: flex-start;
-
-            gap: 15px;
-
-            margin-bottom: 15px;
-        }
-
-        .db-attempt-name {
-            margin: 0;
-
-            font-size: 19px;
-
-            word-break: break-word;
-        }
-
-        .db-attempt-date {
-            color: #888;
-
-            font-size: 12px;
-
-            text-align: right;
-
-            white-space: nowrap;
-        }
-
-        .db-attempt-grid {
-            display: grid;
-
             grid-template-columns:
                 repeat(3, 1fr);
 
             gap: 10px;
+
+            margin-bottom: 15px;
         }
 
-        .db-result-box {
-            background: #f6f6f6;
 
+        .review-summary-box {
+            padding: 12px;
             border-radius: 10px;
-
-            padding: 13px;
-
-            text-align: center;
-        }
-
-        .db-result-box small {
-            display: block;
-
-            color: #777;
-
-            margin-bottom: 5px;
-        }
-
-        .db-result-box strong {
-            font-size: 18px;
-        }
-
-        /* =====================================================
-           FEEDBACK
-        ===================================================== */
-
-        .db-feedback {
-            margin-top: 14px;
-
-            padding: 14px;
-
-            border-radius: 10px;
-
             background: #f5f5f5;
-        }
-
-        .db-feedback strong {
-            display: block;
-
-            margin-bottom: 6px;
-        }
-
-        .db-feedback p {
-            margin: 0;
-
-            color: #555;
-
-            white-space: pre-wrap;
-
-            line-height: 1.5;
-        }
-
-        /* =====================================================
-           QUESTION TIMES
-        ===================================================== */
-
-        .db-question-times {
-            margin-top: 14px;
-
-            border-top: 1px solid #eeeeee;
-
-            padding-top: 14px;
-        }
-
-        .db-question-times summary {
-            cursor: pointer;
-
-            font-weight: 800;
-
-            color: #5148e8;
-        }
-
-        .db-time-list {
-            margin-top: 12px;
-
-            display: grid;
-
-            grid-template-columns:
-                repeat(2, 1fr);
-
-            gap: 8px;
-        }
-
-        .db-time-item {
-            background: #f6f6f6;
-
-            border-radius: 8px;
-
-            padding: 9px;
-
-            font-size: 13px;
-
-            display: flex;
-
-            justify-content: space-between;
-
-            gap: 10px;
-        }
-
-        /* =====================================================
-           EMPTY
-        ===================================================== */
-
-        .db-empty {
-            background: white;
-
-            border-radius: 15px;
-
-            padding: 35px 20px;
-
             text-align: center;
-
-            box-shadow:
-                0 5px 20px rgba(0, 0, 0, .05);
         }
 
-        .db-empty-icon {
-            font-size: 45px;
+
+        .review-summary-box strong {
+            display: block;
+            font-size: 20px;
         }
 
-        .db-empty p {
+
+        .review-summary-box span {
             color: #777;
+            font-size: 13px;
         }
 
-        /* =====================================================
-           MOBILE
-        ===================================================== */
 
-        @media (max-width: 750px) {
+        @media (max-width: 650px) {
 
-            .db-navbar {
-                padding: 12px 15px;
-            }
-
-            .db-logo {
-                font-size: 18px;
-            }
-
-            .db-nav-button {
-                padding: 8px 10px;
-                font-size: 12px;
-            }
-
-            .db-header {
-                padding: 18px;
-            }
-
-            .db-header h1 {
-                font-size: 24px;
-            }
-
-            .db-stats {
-                grid-template-columns:
-                    repeat(2, 1fr);
-            }
-
-            .db-attempt-top {
-                flex-direction: column;
-            }
-
-            .db-attempt-date {
-                text-align: left;
-            }
-
-            .db-attempt-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .db-time-list {
-                grid-template-columns: 1fr;
-            }
-
-        }
-
-        @media (max-width: 500px) {
-
-            .db-container {
-                padding: 15px 10px;
-            }
-
-            .db-share-row {
-                flex-direction: column;
-            }
-
-            .db-share-input {
-                width: 100%;
-            }
-
-            .db-button {
-                width: 100%;
-            }
-
-            .db-actions {
-                flex-direction: column;
-            }
-
-            .db-actions a,
-            .db-actions button {
-                width: 100%;
-            }
-
-            .db-stats {
+            .review-summary {
                 grid-template-columns: 1fr;
             }
 
@@ -594,81 +193,71 @@
 
 <body>
 
-<div class="db-page">
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<header class="navbar">
+
+    <h2>
+        📊 Dashboard
+    </h2>
 
 
-    <!-- =====================================================
-         NAVBAR
-    ====================================================== -->
+    <a href="create.html">
+        New Quiz
+    </a>
 
-    <header class="db-navbar">
-
-        <h2 class="db-logo">
-            📊 Quiz Dashboard
-        </h2>
+</header>
 
 
-        <div class="db-nav-actions">
+<!-- =====================================================
+     MAIN
+===================================================== -->
 
-            <a
-                href="/"
-                class="db-nav-button"
-            >
-                🏠 Home
-            </a>
+<main class="container">
 
+    <div id="dashboard">
 
-            <a
-                href="create.html"
-                class="db-nav-button db-primary"
-            >
-                ➕ New Quiz
-            </a>
+        <div class="card">
 
-        </div>
-
-    </header>
-
-
-    <main class="db-container">
-
-        <div id="dashboard">
-
-            <div class="db-message">
-
-                <h2>
-                    ⏳ Loading Dashboard...
-                </h2>
-
-                <p>
-                    Please wait.
-                </p>
-
-            </div>
+            <p>
+                ⏳ Loading dashboard...
+            </p>
 
         </div>
 
-    </main>
+    </div>
 
-
-</div>
+</main>
 
 
 <script>
 
-    /* =====================================================
-       QUIZ CODE
-    ===================================================== */
 
-    const code =
-        new URLSearchParams(
-            window.location.search
-        ).get("code");
+/* =====================================================
+   CODE
+===================================================== */
+
+const code =
+    new URLSearchParams(
+        location.search
+    ).get("code");
 
 
-    /* =====================================================
-       ELEMENT
-    ===================================================== */
+/* =====================================================
+   GLOBAL DATA
+===================================================== */
+
+let dashboardData = null;
+
+
+/* =====================================================
+   LOAD DASHBOARD
+===================================================== */
+
+async function loadDashboard() {
 
     const dashboard =
         document.getElementById(
@@ -676,97 +265,536 @@
         );
 
 
-    /* =====================================================
-       LOAD DASHBOARD
-    ===================================================== */
-
-    async function loadDashboard() {
-
-        if (!code) {
-
-            showNoCode();
-
-            return;
-
-        }
-
+    if (!code) {
 
         dashboard.innerHTML = `
 
-            <div class="db-message">
+            <div class="result-box">
 
                 <h2>
-                    ⏳ Loading Dashboard...
+                    ❌ Invalid dashboard link
                 </h2>
 
                 <p>
-                    Fetching participant results.
+                    No quiz code was provided.
                 </p>
 
             </div>
 
         `;
 
+        return;
 
-        try {
-
-            const response =
-                await fetch(
-                    `/api/quizzes/${encodeURIComponent(code)}/dashboard`
-                );
+    }
 
 
-            const data =
-                await response.json();
+    try {
+
+        const response =
+            await fetch(
+                `/api/quizzes/${encodeURIComponent(code)}/dashboard`
+            );
 
 
-            if (!response.ok) {
-
-                throw new Error(
-                    data.error ||
-                    "Quiz not found."
-                );
-
-            }
+        const data =
+            await response.json();
 
 
-            renderDashboard(
-                data
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "Quiz not found."
             );
 
         }
 
-        catch (error) {
 
-            console.error(
-                "Dashboard error:",
-                error
-            );
+        dashboardData =
+            data;
 
 
-            dashboard.innerHTML = `
+        renderDashboard();
 
-                <div class="db-message">
+    }
 
-                    <h2>
-                        ❌ Unable to Load Dashboard
-                    </h2>
+    catch (error) {
 
-                    <p>
-                        ${escapeHTML(
-                            error.message
+        console.error(
+            "DASHBOARD ERROR:",
+            error
+        );
+
+
+        dashboard.innerHTML = `
+
+            <div class="result-box">
+
+                <h2>
+                    ❌ Unable to load dashboard
+                </h2>
+
+                <p>
+                    ${escapeHTML(
+                        error.message
+                    )}
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* =====================================================
+   RENDER DASHBOARD
+===================================================== */
+
+function renderDashboard() {
+
+    const data =
+        dashboardData;
+
+
+    const stats =
+        data.statistics;
+
+
+    document
+        .getElementById(
+            "dashboard"
+        )
+        .innerHTML = `
+
+            <!-- =========================================
+                 HEADER
+            ========================================== -->
+
+            <div class="dashboard-header">
+
+                <h1>
+                    ${escapeHTML(
+                        data.quiz.title
+                    )}
+                </h1>
+
+
+                <p>
+
+                    ${escapeHTML(
+                        data.quiz.description ||
+                        ""
+                    )}
+
+                </p>
+
+
+                <!-- SHARE LINK -->
+
+                <div class="share-section">
+
+                    <strong>
+                        🔗 Share Link
+                    </strong>
+
+
+                    <input
+                        id="shareLink"
+                        value="${escapeAttribute(
+                            `${location.origin}/quiz.html?code=${code}`
+                        )}"
+                        readonly
+                    >
+
+
+                    <button
+                        type="button"
+                        onclick="copyShareLink()"
+                    >
+
+                        📋 Copy Link
+
+                    </button>
+
+                </div>
+
+
+                <!-- ACTIONS -->
+
+                <div class="dashboard-actions">
+
+                    <a
+                        href="/api/quizzes/${encodeURIComponent(code)}/export"
+                    >
+
+                        📥 Export CSV
+
+                    </a>
+
+
+                    <button
+                        class="danger"
+                        type="button"
+                        onclick="deleteQuiz()"
+                    >
+
+                        🗑️ Delete Quiz
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 STATISTICS
+            ========================================== -->
+
+            <h2>
+                📈 Statistics
+            </h2>
+
+
+            <div class="stats">
+
+                <div class="stat">
+
+                    <span>
+                        Attempts
+                    </span>
+
+                    <strong>
+                        ${stats.attempts || 0}
+                    </strong>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <span>
+                        Average Accuracy
+                    </span>
+
+                    <strong>
+                        ${Number(
+                            stats.average_accuracy ||
+                            0
+                        ).toFixed(1)}%
+                    </strong>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <span>
+                        Average Time
+                    </span>
+
+                    <strong>
+
+                        ${formatTime(
+                            Math.round(
+                                stats.average_time ||
+                                0
+                            )
                         )}
-                    </p>
+
+                    </strong>
+
+                </div>
 
 
-                    <div class="db-actions">
+                <div class="stat">
 
-                        <a
-                            href="/"
-                            class="db-refresh"
+                    <span>
+                        Highest Score
+                    </span>
+
+                    <strong>
+                        ${stats.highest_score || 0}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 PARTICIPANTS
+            ========================================== -->
+
+            <h2>
+                👥 Participant Results
+            </h2>
+
+
+            <div id="attempts">
+
+                ${renderAttempts(
+                    data.attempts
+                )}
+
+            </div>
+
+        `;
+
+}
+
+
+/* =====================================================
+   RENDER ATTEMPTS
+===================================================== */
+
+function renderAttempts(
+    attempts
+) {
+
+    if (
+        !attempts ||
+        attempts.length === 0
+    ) {
+
+        return `
+
+            <div class="card">
+
+                <p>
+                    No one has attempted
+                    this quiz yet.
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+
+    return attempts.map(
+        (attempt, index) => {
+
+            const correctCount =
+                attempt.score;
+
+
+            const unansweredCount =
+                calculateUnanswered(
+                    attempt
+                );
+
+
+            const wrongCount =
+                Math.max(
+                    0,
+                    attempt.total -
+                    correctCount -
+                    unansweredCount
+                );
+
+
+            return `
+
+                <div
+                    class="attempt"
+                    id="attempt-${attempt.id}"
+                >
+
+                    <!-- =================================
+                         ATTEMPT HEADER
+                    ================================== -->
+
+                    <div class="attempt-top">
+
+                        <h3>
+
+                            ${index + 1}.
+                            ${escapeHTML(
+                                attempt.participant_name
+                            )}
+
+                        </h3>
+
+
+                        <span>
+
+                            ${new Date(
+                                attempt.submitted_at
+                            ).toLocaleString()}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- =================================
+                         SCORE
+                    ================================== -->
+
+                    <div class="attempt-grid">
+
+                        <div>
+
+                            <small>
+                                Score
+                            </small>
+
+                            <strong>
+
+                                ${attempt.score}
+                                /
+                                ${attempt.total}
+
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                Accuracy
+                            </small>
+
+                            <strong>
+
+                                ${attempt.accuracy}%
+
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <small>
+                                Time Taken
+                            </small>
+
+                            <strong>
+
+                                ${formatTime(
+                                    attempt.time_taken
+                                )}
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================
+                         QUICK BREAKDOWN
+                    ================================== -->
+
+                    <div class="review-summary">
+
+                        <div
+                            class="review-summary-box"
                         >
-                            🏠 Return Home
-                        </a>
+
+                            <strong>
+                                ${correctCount}
+                            </strong>
+
+                            <span>
+                                ✅ Correct
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="review-summary-box"
+                        >
+
+                            <strong>
+                                ${wrongCount}
+                            </strong>
+
+                            <span>
+                                ❌ Wrong
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="review-summary-box"
+                        >
+
+                            <strong>
+                                ${unansweredCount}
+                            </strong>
+
+                            <span>
+                                ⚪ Not Attempted
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================
+                         REVIEW BUTTON
+                    ================================== -->
+
+                    <div class="attempt-review">
+
+                        <button
+                            class="review-toggle"
+                            type="button"
+                            onclick="toggleReview(${attempt.id})"
+                        >
+
+                            🔍 View Question-by-Question Results
+
+                        </button>
+
+
+                        <div
+                            id="review-${attempt.id}"
+                            class="review-content"
+                        >
+
+                            ${renderQuestionReview(
+                                attempt
+                            )}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================
+                         FEEDBACK
+                    ================================== -->
+
+                    <div class="feedback">
+
+                        <strong>
+                            💬 Feedback
+                        </strong>
+
+
+                        <p>
+
+                            ${
+                                attempt.feedback
+                                ? escapeHTML(
+                                    attempt.feedback
+                                )
+                                : "No feedback provided."
+                            }
+
+                        </p>
 
                     </div>
 
@@ -775,796 +803,514 @@
             `;
 
         }
+    ).join("");
 
-    }
+}
 
 
-    /* =====================================================
-       NO CODE
-    ===================================================== */
+/* =====================================================
+   CALCULATE UNANSWERED
+===================================================== */
 
-    function showNoCode() {
+function calculateUnanswered(
+    attempt
+) {
 
-        dashboard.innerHTML = `
+    const questions =
+        dashboardData.questions;
 
-            <div class="db-message">
 
-                <h2>
-                    📊 Quiz Dashboard
-                </h2>
+    let unanswered = 0;
 
-                <p>
-                    You need a quiz code to view
-                    its results.
-                </p>
 
+    questions.forEach(
+        question => {
 
-                <div class="db-actions">
+            const answer =
+                attempt.answers?.[
+                    question.id
+                ];
 
-                    <a
-                        href="/#results"
-                        class="db-refresh"
-                    >
-                        🔑 Enter Quiz Code
-                    </a>
 
+            if (
+                answer === undefined ||
+                answer === null ||
+                answer === ""
+            ) {
 
-                    <a
-                        href="create.html"
-                        class="db-primary"
-                    >
-                        ➕ Create Quiz
-                    </a>
+                unanswered++;
 
-                </div>
-
-            </div>
-
-        `;
-
-    }
-
-
-    /* =====================================================
-       RENDER DASHBOARD
-    ===================================================== */
-
-    function renderDashboard(
-        data
-    ) {
-
-        const stats =
-            data.statistics || {};
-
-
-        const attempts =
-            Array.isArray(
-                data.attempts
-            )
-                ? data.attempts
-                : [];
-
-
-        const quiz =
-            data.quiz || {};
-
-
-        const quizUrl =
-            `${window.location.origin}/quiz.html?code=${encodeURIComponent(code)}`;
-
-
-        dashboard.innerHTML = `
-
-            <!-- =========================================
-                 QUIZ INFORMATION
-            ========================================== -->
-
-            <section class="db-header">
-
-                <h1>
-                    ${escapeHTML(
-                        quiz.title ||
-                        "Untitled Quiz"
-                    )}
-                </h1>
-
-
-                <p class="db-description">
-
-                    ${escapeHTML(
-                        quiz.description ||
-                        "No description provided."
-                    )}
-
-                </p>
-
-
-                <div>
-
-                    Quiz Code:
-
-                    <span class="db-code">
-
-                        ${escapeHTML(
-                            quiz.shareCode ||
-                            code
-                        )}
-
-                    </span>
-
-                </div>
-
-
-                <!-- SHARE -->
-
-                <div class="db-share">
-
-                    <div class="db-share-label">
-                        🔗 Share Quiz
-                    </div>
-
-
-                    <div class="db-share-row">
-
-                        <input
-                            id="shareLink"
-                            class="db-share-input"
-                            value="${escapeAttribute(
-                                quizUrl
-                            )}"
-                            readonly
-                        >
-
-
-                        <button
-                            class="db-button db-copy"
-                            type="button"
-                            onclick="copyShareLink()"
-                        >
-                            📋 Copy Link
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                <!-- ACTIONS -->
-
-                <div class="db-actions">
-
-                    <a
-                        href="${escapeAttribute(
-                            quizUrl
-                        )}"
-                        target="_blank"
-                        class="db-open"
-                    >
-                        🔗 Open Quiz
-                    </a>
-
-
-                    <a
-                        href="/api/quizzes/${encodeURIComponent(code)}/export"
-                        class="db-export"
-                    >
-                        📥 Export CSV
-                    </a>
-
-
-                    <button
-                        type="button"
-                        class="db-refresh"
-                        onclick="loadDashboard()"
-                    >
-                        🔄 Refresh
-                    </button>
-
-
-                    <button
-                        type="button"
-                        class="db-delete"
-                        onclick="deleteQuiz()"
-                    >
-                        🗑️ Delete Quiz
-                    </button>
-
-                </div>
-
-            </section>
-
-
-            <!-- =========================================
-                 STATISTICS
-            ========================================== -->
-
-            <h2 class="db-section-title">
-                📈 Statistics
-            </h2>
-
-
-            <section class="db-stats">
-
-                <div class="db-stat">
-
-                    <span>
-                        👥 Attempts
-                    </span>
-
-                    <strong>
-                        ${Number(
-                            stats.attempts || 0
-                        )}
-                    </strong>
-
-                </div>
-
-
-                <div class="db-stat">
-
-                    <span>
-                        🎯 Average Accuracy
-                    </span>
-
-                    <strong>
-                        ${Number(
-                            stats.average_accuracy || 0
-                        ).toFixed(1)}%
-                    </strong>
-
-                </div>
-
-
-                <div class="db-stat">
-
-                    <span>
-                        ⏱️ Average Time
-                    </span>
-
-                    <strong>
-                        ${formatTime(
-                            Math.round(
-                                Number(
-                                    stats.average_time || 0
-                                )
-                            )
-                        )}
-                    </strong>
-
-                </div>
-
-
-                <div class="db-stat">
-
-                    <span>
-                        🏆 Highest Score
-                    </span>
-
-                    <strong>
-                        ${
-                            stats.highest_score === null ||
-                            stats.highest_score === undefined
-                                ? "0"
-                                : stats.highest_score
-                        }
-                    </strong>
-
-                </div>
-
-            </section>
-
-
-            <!-- =========================================
-                 PARTICIPANTS
-            ========================================== -->
-
-            <h2 class="db-section-title">
-
-                👥 Participant Results
-
-            </h2>
-
-
-            <section>
-
-                ${
-                    attempts.length === 0
-
-                        ? renderEmpty()
-
-                        : attempts
-                            .map(
-                                (
-                                    attempt,
-                                    index
-                                ) =>
-                                    renderAttempt(
-                                        attempt,
-                                        index
-                                    )
-                            )
-                            .join("")
-                }
-
-            </section>
-
-        `;
-
-    }
-
-
-    /* =====================================================
-       RENDER ATTEMPT
-    ===================================================== */
-
-    function renderAttempt(
-        attempt,
-        index
-    ) {
-
-        let questionTimes = {};
-
-
-        try {
-
-            questionTimes =
-                typeof attempt.question_times ===
-                "string"
-
-                    ? JSON.parse(
-                        attempt.question_times
-                    )
-
-                    : (
-                        attempt.question_times ||
-                        {}
-                    );
+            }
 
         }
+    );
 
-        catch {
 
-            questionTimes = {};
+    return unanswered;
 
-        }
+}
 
 
-        const timeEntries =
-            Object.entries(
-                questionTimes
-            );
+/* =====================================================
+   QUESTION REVIEW
+===================================================== */
 
+function renderQuestionReview(
+    attempt
+) {
 
-        return `
+    const questions =
+        dashboardData.questions;
 
-            <article class="db-attempt">
 
-                <div class="db-attempt-top">
+    return questions.map(
+        (question, index) => {
 
-                    <h3 class="db-attempt-name">
+            const selected =
+                attempt.answers?.[
+                    question.id
+                ];
 
-                        ${index + 1}.
-                        ${escapeHTML(
-                            attempt.participant_name ||
-                            "Unknown"
-                        )}
 
-                    </h3>
-
-
-                    <span class="db-attempt-date">
-
-                        ${
-                            attempt.submitted_at
-                                ? new Date(
-                                    attempt.submitted_at
-                                ).toLocaleString()
-                                : ""
-                        }
-
-                    </span>
-
-                </div>
-
-
-                <div class="db-attempt-grid">
-
-
-                    <div class="db-result-box">
-
-                        <small>
-                            🎯 Score
-                        </small>
-
-                        <strong>
-
-                            ${Number(
-                                attempt.score || 0
-                            )}
-
-                            /
-
-                            ${Number(
-                                attempt.total || 0
-                            )}
-
-                        </strong>
-
-                    </div>
-
-
-                    <div class="db-result-box">
-
-                        <small>
-                            📈 Accuracy
-                        </small>
-
-                        <strong>
-
-                            ${Number(
-                                attempt.accuracy || 0
-                            ).toFixed(2)}%
-
-                        </strong>
-
-                    </div>
-
-
-                    <div class="db-result-box">
-
-                        <small>
-                            ⏱️ Time Taken
-                        </small>
-
-                        <strong>
-
-                            ${formatTime(
-                                Number(
-                                    attempt.time_taken || 0
-                                )
-                            )}
-
-                        </strong>
-
-                    </div>
-
-
-                </div>
-
-
-                <!-- FEEDBACK -->
-
-                <div class="db-feedback">
-
-                    <strong>
-                        💬 Feedback
-                    </strong>
-
-
-                    <p>
-
-                        ${
-                            attempt.feedback &&
-                            attempt.feedback.trim()
-
-                                ? escapeHTML(
-                                    attempt.feedback
-                                )
-
-                                : "No feedback provided."
-                        }
-
-                    </p>
-
-                </div>
-
-
-                <!-- QUESTION TIMES -->
-
-                ${
-                    timeEntries.length > 0
-
-                        ? `
-
-                            <details
-                                class="db-question-times"
-                            >
-
-                                <summary>
-                                    ⏱️ View Question-wise Time
-                                </summary>
-
-
-                                <div
-                                    class="db-time-list"
-                                >
-
-                                    ${
-                                        timeEntries
-                                            .map(
-                                                (
-                                                    [
-                                                        questionId,
-                                                        seconds
-                                                    ]
-                                                ) => `
-
-                                                    <div
-                                                        class="db-time-item"
-                                                    >
-
-                                                        <span>
-                                                            Question
-                                                            ${escapeHTML(
-                                                                questionId
-                                                            )}
-                                                        </span>
-
-                                                        <strong>
-                                                            ${formatTime(
-                                                                Number(
-                                                                    seconds || 0
-                                                                )
-                                                            )}
-                                                        </strong>
-
-                                                    </div>
-
-                                                `
-                                            )
-                                            .join("")
-                                    }
-
-                                </div>
-
-                            </details>
-
-                        `
-
-                        : ""
-                }
-
-            </article>
-
-        `;
-
-    }
-
-
-    /* =====================================================
-       EMPTY
-    ===================================================== */
-
-    function renderEmpty() {
-
-        return `
-
-            <div class="db-empty">
-
-                <div class="db-empty-icon">
-                    📭
-                </div>
-
-                <h3>
-                    No attempts yet
-                </h3>
-
-                <p>
-                    Share the quiz link with
-                    participants. Their results
-                    will appear here after they
-                    submit the quiz.
-                </p>
-
-            </div>
-
-        `;
-
-    }
-
-
-    /* =====================================================
-       COPY LINK
-    ===================================================== */
-
-    async function copyShareLink() {
-
-        const input =
-            document.getElementById(
-                "shareLink"
-            );
-
-
-        if (!input) {
-            return;
-        }
-
-
-        try {
-
-            await navigator.clipboard.writeText(
-                input.value
-            );
-
-
-            alert(
-                "Quiz link copied! 🔗"
-            );
-
-        }
-
-        catch {
-
-            input.select();
-
-            document.execCommand(
-                "copy"
-            );
-
-
-            alert(
-                "Quiz link copied! 🔗"
-            );
-
-        }
-
-    }
-
-
-    /* =====================================================
-       DELETE QUIZ
-    ===================================================== */
-
-    async function deleteQuiz() {
-
-        const confirmed =
-            confirm(
-                "Are you sure you want to delete this quiz and ALL participant results?"
-            );
-
-
-        if (!confirmed) {
-            return;
-        }
-
-
-        try {
-
-            const response =
-                await fetch(
-                    `/api/quizzes/${encodeURIComponent(code)}`,
-                    {
-                        method: "DELETE"
-                    }
+            const correct =
+                Number(
+                    question.correctAnswer
                 );
 
 
-            const data =
-                await response.json();
+            const hasAnswer =
+                selected !== undefined &&
+                selected !== null &&
+                selected !== "";
 
 
-            if (!response.ok) {
+            let statusClass;
+            let statusText;
 
-                throw new Error(
-                    data.error ||
-                    "Could not delete quiz."
-                );
+
+            if (!hasAnswer) {
+
+                statusClass =
+                    "unanswered";
+
+                statusText =
+                    "⚪ Not Attempted";
+
+            }
+
+            else if (
+                Number(selected) === correct
+            ) {
+
+                statusClass =
+                    "correct";
+
+                statusText =
+                    "✅ Correct";
+
+            }
+
+            else {
+
+                statusClass =
+                    "wrong";
+
+                statusText =
+                    "❌ Wrong";
 
             }
 
 
-            alert(
-                "Quiz deleted successfully."
+            const time =
+                attempt.question_times?.[
+                    question.id
+                ] || 0;
+
+
+            return `
+
+                <div
+                    class="
+                        review-question
+                        ${statusClass}
+                    "
+                >
+
+                    <!-- STATUS -->
+
+                    <div
+                        class="
+                            review-status
+                            ${statusClass}
+                        "
+                    >
+
+                        ${statusText}
+
+                    </div>
+
+
+                    <!-- QUESTION -->
+
+                    <div class="review-question-text">
+
+                        Q${index + 1}.
+                        ${escapeHTML(
+                            question.question
+                        )}
+
+                    </div>
+
+
+                    <!-- OPTIONS -->
+
+                    <div>
+
+                        ${question.options.map(
+                            (option, optionIndex) => {
+
+                                const isCorrect =
+                                    optionIndex ===
+                                    correct;
+
+
+                                const isSelected =
+                                    hasAnswer &&
+                                    Number(selected) ===
+                                    optionIndex;
+
+
+                                let classes =
+                                    "review-option";
+
+
+                                if (
+                                    isCorrect
+                                ) {
+
+                                    classes +=
+                                        " correct-answer";
+
+                                }
+
+
+                                if (
+                                    isSelected &&
+                                    !isCorrect
+                                ) {
+
+                                    classes +=
+                                        " wrong-answer";
+
+                                }
+
+
+                                let prefix = "";
+
+
+                                if (
+                                    isCorrect
+                                ) {
+
+                                    prefix =
+                                        "✓ Correct: ";
+
+                                }
+
+                                else if (
+                                    isSelected
+                                ) {
+
+                                    prefix =
+                                        "Your answer: ";
+
+                                }
+
+
+                                return `
+
+                                    <div
+                                        class="${classes}"
+                                    >
+
+                                        ${prefix}
+                                        ${escapeHTML(
+                                            String(option)
+                                        )}
+
+                                    </div>
+
+                                `;
+
+                            }
+                        ).join("")}
+
+                    </div>
+
+
+                    <!-- TIME -->
+
+                    <div class="review-time">
+
+                        ⏱️ Time on question:
+                        <strong>
+                            ${formatTime(
+                                Number(time)
+                            )}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+    ).join("");
+
+}
+
+
+/* =====================================================
+   TOGGLE QUESTION REVIEW
+===================================================== */
+
+function toggleReview(
+    attemptId
+) {
+
+    const review =
+        document.getElementById(
+            `review-${attemptId}`
+        );
+
+
+    if (!review) {
+
+        return;
+
+    }
+
+
+    review.classList.toggle(
+        "show"
+    );
+
+}
+
+
+/* =====================================================
+   COPY SHARE LINK
+===================================================== */
+
+async function copyShareLink() {
+
+    const input =
+        document.getElementById(
+            "shareLink"
+        );
+
+
+    if (!input) {
+
+        return;
+
+    }
+
+
+    try {
+
+        await navigator.clipboard.writeText(
+            input.value.trim()
+        );
+
+
+        alert(
+            "Share link copied!"
+        );
+
+    }
+
+    catch {
+
+        input.select();
+
+        document.execCommand(
+            "copy"
+        );
+
+
+        alert(
+            "Share link copied!"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   DELETE QUIZ
+===================================================== */
+
+async function deleteQuiz() {
+
+    const confirmed =
+        confirm(
+            "Delete this quiz and all its responses?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/quizzes/${encodeURIComponent(code)}`,
+                {
+                    method:
+                        "DELETE"
+                }
             );
 
 
-            window.location.href =
-                "/";
+        if (response.ok) {
+
+            alert(
+                "Quiz deleted."
+            );
+
+
+            location.href =
+                "create.html";
 
         }
 
-        catch (error) {
+        else {
+
+            const result =
+                await response.json();
+
 
             alert(
-                error.message
+                result.error ||
+                "Could not delete quiz."
             );
 
         }
 
     }
 
+    catch (error) {
 
-    /* =====================================================
-       FORMAT TIME
-    ===================================================== */
-
-    function formatTime(
-        seconds
-    ) {
-
-        seconds =
-            Math.max(
-                0,
-                Number(seconds) || 0
-            );
-
-
-        const minutes =
-            Math.floor(
-                seconds / 60
-            );
-
-
-        const remaining =
-            Math.floor(
-                seconds % 60
-            );
-
-
-        return `${minutes}m ${String(
-            remaining
-        ).padStart(2, "0")}s`;
+        alert(
+            "Could not delete quiz."
+        );
 
     }
 
-
-    /* =====================================================
-       HTML ESCAPING
-    ===================================================== */
-
-    function escapeHTML(
-        text
-    ) {
-
-        const div =
-            document.createElement(
-                "div"
-            );
+}
 
 
-        div.textContent =
-            String(
-                text ?? ""
-            );
+/* =====================================================
+   FORMAT TIME
+===================================================== */
+
+function formatTime(
+    seconds
+) {
+
+    seconds =
+        Math.max(
+            0,
+            Number(seconds) || 0
+        );
 
 
-        return div.innerHTML;
+    const minutes =
+        Math.floor(
+            seconds / 60
+        );
 
-    }
+
+    const remaining =
+        seconds % 60;
 
 
-    function escapeAttribute(
-        text
-    ) {
+    return `${minutes}m ${String(
+        remaining
+    ).padStart(2, "0")}s`;
 
-        return String(
+}
+
+
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+
+function escapeHTML(
+    text
+) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        String(
             text ?? ""
+        );
+
+
+    return div.innerHTML;
+
+}
+
+
+/* =====================================================
+   ESCAPE ATTRIBUTE
+===================================================== */
+
+function escapeAttribute(
+    text
+) {
+
+    return String(
+        text ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
         )
-            .replace(
-                /&/g,
-                "&amp;"
-            )
-            .replace(
-                /"/g,
-                "&quot;"
-            )
-            .replace(
-                /</g,
-                "&lt;"
-            )
-            .replace(
-                />/g,
-                "&gt;"
-            );
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        );
 
-    }
+}
 
 
-    /* =====================================================
-       START
-    ===================================================== */
+/* =====================================================
+   START
+===================================================== */
 
-    loadDashboard();
+loadDashboard();
 
 </script>
 
