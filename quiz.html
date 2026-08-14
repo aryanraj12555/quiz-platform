@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -22,7 +21,9 @@
 
 <body>
 
-<!-- TIMER -->
+<!-- =====================================================
+     TIMER
+===================================================== -->
 
 <div
     id="timerBar"
@@ -46,12 +47,22 @@
 
 <main class="container quiz-container">
 
-    <div id="quiz"></div>
+    <div id="quiz">
+
+        <div class="result-box">
+            <h2>⏳ Loading quiz...</h2>
+        </div>
+
+    </div>
 
 </main>
 
 
 <script>
+
+/* =====================================================
+   QUIZ CODE
+===================================================== */
 
 const code =
     new URLSearchParams(
@@ -59,17 +70,24 @@ const code =
     ).get("code");
 
 
-let quiz;
+let quiz = null;
 
-let startTime;
+let startTime = 0;
 
-let timerInterval;
+let timerInterval = null;
 
 let submitted = false;
 
 
 /* =====================================================
-   LOAD
+   QUESTION TIMING
+===================================================== */
+
+const questionStartTimes = {};
+
+
+/* =====================================================
+   LOAD QUIZ
 ===================================================== */
 
 async function loadQuiz() {
@@ -85,41 +103,59 @@ async function loadQuiz() {
     }
 
 
-    const response =
-        await fetch(
-            `/api/quizzes/${code}`
-        );
+    try {
+
+        const response =
+            await fetch(
+                `/api/quizzes/${encodeURIComponent(code)}`
+            );
 
 
-    if (!response.ok) {
+        const data =
+            await response.json();
 
-        showError(
-            "Quiz not found."
-        );
 
-        return;
+        if (!response.ok) {
+
+            showError(
+                data.error ||
+                "Quiz not found."
+            );
+
+            return;
+
+        }
+
+
+        quiz = data;
+
+
+        renderQuiz();
+
+
+        startTime =
+            Date.now();
+
+
+        startTimer();
 
     }
 
+    catch (error) {
 
-    quiz =
-        await response.json();
+        console.error(error);
 
+        showError(
+            "Unable to connect to the quiz server."
+        );
 
-    renderQuiz();
-
-
-    startTime =
-        Date.now();
-
-
-    startTimer();
+    }
 
 }
 
 
 /* =====================================================
-   RENDER
+   RENDER QUIZ
 ===================================================== */
 
 function renderQuiz() {
@@ -140,11 +176,21 @@ function renderQuiz() {
                 )}
             </h1>
 
-            <p>
-                ${escapeHTML(
-                    quiz.description || ""
-                )}
-            </p>
+
+            ${
+                quiz.description
+                ?
+                `
+                    <p>
+                        ${escapeHTML(
+                            quiz.description
+                        )}
+                    </p>
+                `
+                :
+                ""
+            }
+
 
             <p class="muted">
 
@@ -156,15 +202,57 @@ function renderQuiz() {
         </div>
 
 
-        <input
-            id="participant"
-            class="name-input"
-            placeholder="Enter your name"
-            autocomplete="name"
-        >
+        <!-- PARTICIPANT NAME -->
+
+        <div class="card">
+
+            <label
+                for="participant"
+                style="
+                    display:block;
+                    font-weight:700;
+                    margin-bottom:8px;
+                "
+            >
+
+                👤 Your Name
+
+            </label>
+
+
+            <input
+                id="participant"
+                class="name-input"
+                type="text"
+                placeholder="Enter your name"
+                autocomplete="name"
+                maxlength="100"
+                required
+            >
+
+
+            <p
+                id="nameError"
+                style="
+                    display:none;
+                    color:#c62828;
+                    margin-top:7px;
+                    font-weight:600;
+                "
+            >
+
+                Please enter your name before submitting.
+
+            </p>
+
+        </div>
 
     `;
 
+
+    /* =================================================
+       QUESTIONS
+    ================================================= */
 
     quiz.questions.forEach(
         (q, index) => {
@@ -173,7 +261,9 @@ function renderQuiz() {
 
                 <div
                     class="quiz-question"
-                    data-question="${q.id}"
+                    data-question="${escapeHTML(
+                        String(q.id)
+                    )}"
                 >
 
                     <div class="question-number">
@@ -206,19 +296,22 @@ function renderQuiz() {
 
                                 <input
                                     type="radio"
-                                    name="q-${q.id}"
+                                    name="q-${escapeHTML(
+                                        String(q.id)
+                                    )}"
                                     value="${i}"
-                                    onchange="
-                                        questionAnswered(
-                                            ${q.id}
-                                        )
-                                    "
+                                    onchange="questionAnswered(
+                                        ${JSON.stringify(q.id)}
+                                    )"
                                 >
 
+
                                 <span>
+
                                     ${escapeHTML(
                                         String(option)
                                     )}
+
                                 </span>
 
                             </label>
@@ -236,6 +329,10 @@ function renderQuiz() {
     );
 
 
+    /* =================================================
+       FEEDBACK + SUBMIT
+    ================================================= */
+
     html += `
 
         <div class="feedback-box">
@@ -244,12 +341,10 @@ function renderQuiz() {
                 💬 Feedback
             </label>
 
+
             <textarea
                 id="feedback"
-                placeholder="
-                    Any feedback about
-                    this quiz?
-                "
+                placeholder="Any feedback about this quiz?"
             ></textarea>
 
         </div>
@@ -258,6 +353,7 @@ function renderQuiz() {
         <button
             id="submitButton"
             class="success full-button"
+            type="button"
             onclick="submitQuiz(false)"
         >
 
@@ -271,17 +367,69 @@ function renderQuiz() {
     container.innerHTML =
         html;
 
+
+    /* =================================================
+       NAME INPUT EVENTS
+    ================================================= */
+
+    const participantInput =
+        document.getElementById(
+            "participant"
+        );
+
+
+    participantInput.addEventListener(
+        "input",
+        function () {
+
+            const nameError =
+                document.getElementById(
+                    "nameError"
+                );
+
+
+            if (
+                participantInput.value.trim()
+            ) {
+
+                nameError.style.display =
+                    "none";
+
+                participantInput.style.border =
+                    "";
+
+            }
+
+        }
+    );
+
+
+    participantInput.addEventListener(
+        "keydown",
+        function (event) {
+
+            /*
+             Prevent accidental form-like
+             submission if Enter is pressed.
+            */
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                event.preventDefault();
+
+            }
+
+        }
+    );
+
 }
 
 
 /* =====================================================
-   QUESTION TIMING
+   QUESTION ANSWERED
 ===================================================== */
-
-const questionStartTimes = {};
-
-const questionTimes = {};
-
 
 function questionAnswered(
     questionId
@@ -302,39 +450,42 @@ function questionAnswered(
 }
 
 
-/*
-   We calculate approximate
-   per-question time when submitting.
-*/
+/* =====================================================
+   CALCULATE QUESTION TIMES
+===================================================== */
 
 function calculateQuestionTimes() {
 
     const result = {};
 
 
-    quiz.questions.forEach(q => {
+    quiz.questions.forEach(
+        q => {
 
-        if (
-            questionStartTimes[
-                q.id
-            ] !== undefined
-        ) {
+            if (
+                questionStartTimes[
+                    q.id
+                ] !== undefined
+            ) {
 
-            result[q.id] =
-                Math.floor(
-                    (
-                        Date.now() -
-                        questionStartTimes[q.id]
-                    ) / 1000
-                );
+                result[q.id] =
+                    Math.floor(
+                        (
+                            Date.now() -
+                            questionStartTimes[q.id]
+                        ) / 1000
+                    );
 
-        } else {
+            }
 
-            result[q.id] = 0;
+            else {
+
+                result[q.id] = 0;
+
+            }
 
         }
-
-    });
+    );
 
 
     return result;
@@ -349,7 +500,9 @@ function calculateQuestionTimes() {
 function startTimer() {
 
     let remaining =
-        quiz.timeLimit;
+        Number(
+            quiz.timeLimit
+        ) || 0;
 
 
     updateTimer(
@@ -358,31 +511,42 @@ function startTimer() {
 
 
     timerInterval =
-        setInterval(() => {
+        setInterval(
+            function () {
 
-            remaining--;
-
-            updateTimer(
-                remaining
-            );
+                remaining--;
 
 
-            if (
-                remaining <= 0
-            ) {
-
-                clearInterval(
-                    timerInterval
+                updateTimer(
+                    remaining
                 );
 
-                submitQuiz(true);
 
-            }
+                if (
+                    remaining <= 0
+                ) {
 
-        }, 1000);
+                    clearInterval(
+                        timerInterval
+                    );
+
+
+                    submitQuiz(
+                        true
+                    );
+
+                }
+
+            },
+            1000
+        );
 
 }
 
+
+/* =====================================================
+   UPDATE TIMER
+===================================================== */
 
 function updateTimer(
     seconds
@@ -391,7 +555,7 @@ function updateTimer(
     seconds =
         Math.max(
             0,
-            seconds
+            Number(seconds) || 0
         );
 
 
@@ -405,24 +569,30 @@ function updateTimer(
         seconds % 60;
 
 
-    document
-        .getElementById(
+    const timer =
+        document.getElementById(
             "timer"
-        )
-        .textContent =
+        );
+
+
+    if (timer) {
+
+        timer.textContent =
             `${String(minutes)
                 .padStart(2, "0")}:${String(secs)
                 .padStart(2, "0")}`;
 
+    }
+
 
     const bar =
-        document
-            .getElementById(
-                "timerBar"
-            );
+        document.getElementById(
+            "timerBar"
+        );
 
 
     if (
+        bar &&
         seconds <= 60
     ) {
 
@@ -436,7 +606,7 @@ function updateTimer(
 
 
 /* =====================================================
-   SUBMIT
+   SUBMIT QUIZ
 ===================================================== */
 
 async function submitQuiz(
@@ -444,8 +614,80 @@ async function submitQuiz(
 ) {
 
     if (submitted) {
+
         return;
+
     }
+
+
+    /* =================================================
+       CHECK NAME FIRST
+       
+       IMPORTANT:
+       Automatic submission after timer expiry is
+       allowed to proceed. Manual submission requires
+       a name.
+    ================================================= */
+
+    const participantInput =
+        document.getElementById(
+            "participant"
+        );
+
+
+    const participantName =
+        participantInput
+            ?.value
+            .trim() || "";
+
+
+    if (
+        !autoSubmit &&
+        !participantName
+    ) {
+
+        const nameError =
+            document.getElementById(
+                "nameError"
+            );
+
+
+        if (nameError) {
+
+            nameError.style.display =
+                "block";
+
+        }
+
+
+        if (participantInput) {
+
+            participantInput.focus();
+
+            participantInput.style.border =
+                "2px solid #c62828";
+
+        }
+
+
+        alert(
+            "Please enter your name before submitting the quiz."
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+       For automatic submission, use Anonymous
+       only if the participant left the name blank.
+    */
+
+    const finalParticipantName =
+        participantName ||
+        "Anonymous";
 
 
     submitted = true;
@@ -456,146 +698,192 @@ async function submitQuiz(
     );
 
 
+    /* =================================================
+       COLLECT ANSWERS
+    ================================================= */
+
     const answers = {};
 
 
-    quiz.questions.forEach(q => {
+    quiz.questions.forEach(
+        q => {
 
-        const selected =
-            document.querySelector(
-                `input[name="q-${q.id}"]:checked`
-            );
-
-
-        if (selected) {
-
-            answers[q.id] =
-                Number(
-                    selected.value
+            const selected =
+                document.querySelector(
+                    `input[name="q-${CSS.escape(
+                        String(q.id)
+                    )}"]:checked`
                 );
 
+
+            if (selected) {
+
+                answers[q.id] =
+                    Number(
+                        selected.value
+                    );
+
+            }
+
         }
+    );
 
-    });
 
+    /* =================================================
+       TIME TAKEN
+    ================================================= */
 
     const timeTaken =
         Math.min(
 
             quiz.timeLimit,
 
-            Math.floor(
-                (
-                    Date.now() -
-                    startTime
-                ) / 1000
+            Math.max(
+                0,
+                Math.floor(
+                    (
+                        Date.now() -
+                        startTime
+                    ) / 1000
+                )
             )
 
         );
 
 
-    const participantName =
-        document
-            .getElementById(
-                "participant"
-            )
-            ?.value
-            .trim() ||
-        "Anonymous";
-
+    /* =================================================
+       FEEDBACK
+    ================================================= */
 
     const feedback =
         document
             .getElementById(
                 "feedback"
             )
-            ?.value ||
-        "";
+            ?.value
+            .trim() || "";
 
+
+    /* =================================================
+       BUTTON
+    ================================================= */
 
     const button =
-        document
-            .getElementById(
-                "submitButton"
-            );
-
-
-    button.disabled =
-        true;
-
-
-    button.textContent =
-        "Submitting...";
-
-
-    const response =
-        await fetch(
-            `/api/quizzes/${code}/submit`,
-            {
-
-                method: "POST",
-
-                headers: {
-
-                    "Content-Type":
-                        "application/json"
-
-                },
-
-                body: JSON.stringify({
-
-                    participantName,
-
-                    answers,
-
-                    questionTimes:
-                        calculateQuestionTimes(),
-
-                    timeTaken,
-
-                    feedback
-
-                })
-
-            }
+        document.getElementById(
+            "submitButton"
         );
 
 
-    const result =
-        await response.json();
-
-
-    if (!response.ok) {
-
-        submitted = false;
+    if (button) {
 
         button.disabled =
-            false;
+            true;
 
         button.textContent =
-            "Submit Quiz";
-
-
-        alert(
-            result.error ||
-            "Submission failed."
-        );
-
-        return;
+            "Submitting...";
 
     }
 
 
-    showResult(
-        result,
-        autoSubmit
-    );
+    try {
+
+        const response =
+            await fetch(
+                `/api/quizzes/${encodeURIComponent(code)}/submit`,
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            participantName:
+                                finalParticipantName,
+
+                            answers:
+
+                                answers,
+
+                            questionTimes:
+
+                                calculateQuestionTimes(),
+
+                            timeTaken:
+
+                                timeTaken,
+
+                            feedback:
+
+                                feedback
+
+                        })
+
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.error ||
+                "Submission failed."
+            );
+
+        }
+
+
+        showResult(
+            result,
+            autoSubmit
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "SUBMISSION ERROR:",
+            error
+        );
+
+
+        submitted = false;
+
+
+        if (button) {
+
+            button.disabled =
+                false;
+
+            button.textContent =
+                "Submit Quiz";
+
+        }
+
+
+        alert(
+            error.message ||
+            "Submission failed. Please try again."
+        );
+
+    }
 
 }
 
 
 /* =====================================================
-   RESULT
+   SHOW RESULT
 ===================================================== */
 
 function showResult(
@@ -603,79 +891,98 @@ function showResult(
     autoSubmit
 ) {
 
-    document
-        .getElementById(
+    const timerBar =
+        document.getElementById(
             "timerBar"
-        )
-        .style.display =
-        "none";
+        );
 
 
-    document
-        .getElementById(
+    if (timerBar) {
+
+        timerBar.style.display =
+            "none";
+
+    }
+
+
+    const quizContainer =
+        document.getElementById(
             "quiz"
-        )
-        .innerHTML = `
-
-            <div class="result-box">
-
-                ${
-                    autoSubmit
-                    ? `
-                        <div class="time-up">
-                            ⏰ Time's up!
-                        </div>
-                    `
-                    : ""
-                }
+        );
 
 
-                <h1>
-                    🎉 Quiz Completed!
-                </h1>
+    quizContainer.innerHTML = `
+
+        <div class="result-box">
+
+            ${
+                autoSubmit
+                ?
+                `
+                    <div class="time-up">
+
+                        ⏰ Time's up!
+
+                    </div>
+                `
+                :
+                ""
+            }
 
 
-                <div class="score-circle">
+            <h1>
 
-                    ${result.score}
-                    /
-                    ${result.total}
+                🎉 Quiz Completed!
 
-                </div>
+            </h1>
 
 
-                <h2>
+            <div class="score-circle">
 
-                    Accuracy:
-                    ${result.accuracy}%
-
-                </h2>
-
-
-                <p>
-
-                    ⏱️ Time Taken:
-
-                    <strong>
-                        ${formatTime(
-                            result.timeTaken
-                        )}
-                    </strong>
-
-                </p>
-
-
-                <button
-                    onclick="location.reload()"
-                >
-
-                    Try Again
-
-                </button>
+                ${Number(result.score) || 0}
+                /
+                ${Number(result.total) || 0}
 
             </div>
 
-        `;
+
+            <h2>
+
+                Accuracy:
+                ${Number(result.accuracy) || 0}%
+
+            </h2>
+
+
+            <p>
+
+                ⏱️ Time Taken:
+
+                <strong>
+
+                    ${formatTime(
+                        Number(
+                            result.timeTaken
+                        ) || 0
+                    )}
+
+                </strong>
+
+            </p>
+
+
+            <button
+                type="button"
+                onclick="location.reload()"
+            >
+
+                Try Again
+
+            </button>
+
+        </div>
+
+    `;
 
 }
 
@@ -684,32 +991,50 @@ function showResult(
    ERROR
 ===================================================== */
 
-function showError(message) {
+function showError(
+    message
+) {
 
-    document
-        .getElementById(
+    const quizContainer =
+        document.getElementById(
             "quiz"
-        )
-        .innerHTML = `
+        );
 
-            <div class="result-box">
 
-                <h2>
-                    ❌ ${message}
-                </h2>
+    quizContainer.innerHTML = `
 
-            </div>
+        <div class="result-box">
 
-        `;
+            <h2>
+
+                ❌
+                ${escapeHTML(
+                    message
+                )}
+
+            </h2>
+
+        </div>
+
+    `;
 
 }
 
 
 /* =====================================================
-   HELPERS
+   FORMAT TIME
 ===================================================== */
 
-function formatTime(seconds) {
+function formatTime(
+    seconds
+) {
+
+    seconds =
+        Math.max(
+            0,
+            Number(seconds) || 0
+        );
+
 
     const minutes =
         Math.floor(
@@ -721,32 +1046,46 @@ function formatTime(seconds) {
         seconds % 60;
 
 
-    return `${minutes}m ${String(
-        remaining
-    ).padStart(2, "0")}s`;
+    return (
+        `${minutes}m ` +
+        `${String(
+            remaining
+        ).padStart(2, "0")}s`
+    );
 
 }
 
 
-function escapeHTML(text) {
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+
+function escapeHTML(
+    text
+) {
 
     const div =
         document.createElement(
             "div"
         );
 
+
     div.textContent =
-        text;
+        String(text ?? "");
+
 
     return div.innerHTML;
 
 }
 
 
+/* =====================================================
+   START
+===================================================== */
+
 loadQuiz();
 
 </script>
 
 </body>
-
 </html>
