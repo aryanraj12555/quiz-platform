@@ -5,8 +5,13 @@ const path = require("path");
 
 const app = express();
 
-const PORT =
-    process.env.PORT || 3000;
+/*
+=========================================================
+SERVER
+=========================================================
+*/
+
+const PORT = process.env.PORT || 3000;
 
 
 /*
@@ -19,8 +24,7 @@ const dbPath =
     process.env.DATABASE_PATH ||
     path.join(__dirname, "quiz.db");
 
-const db =
-    new Database(dbPath);
+const db = new Database(dbPath);
 
 
 /*
@@ -35,10 +39,22 @@ app.use(
     })
 );
 
+/*
+IMPORTANT:
+
+Your HTML files are in the ROOT of the repository:
+
+index.html
+create.html
+quiz.html
+dashboard.html
+style.css
+
+Therefore we serve __dirname directly.
+*/
+
 app.use(
-    express.static(
-        path.join(__dirname, "public")
-    )
+    express.static(__dirname)
 );
 
 
@@ -49,7 +65,6 @@ DATABASE TABLES
 */
 
 db.exec(`
-
     CREATE TABLE IF NOT EXISTS quizzes (
 
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -95,7 +110,6 @@ db.exec(`
         FOREIGN KEY (quiz_id)
             REFERENCES quizzes(id)
     );
-
 `);
 
 
@@ -131,6 +145,25 @@ function formatSeconds(seconds) {
     );
 
 }
+
+
+/*
+=========================================================
+HOME ROUTE
+=========================================================
+
+This guarantees that visiting the Render URL opens
+index.html.
+=========================================================
+*/
+
+app.get("/", (req, res) => {
+
+    res.sendFile(
+        path.join(__dirname, "index.html")
+    );
+
+});
 
 
 /*
@@ -179,6 +212,10 @@ app.post(
             } = req.body;
 
 
+            /*
+            ---------- TITLE ----------
+            */
+
             if (
                 !title ||
                 typeof title !== "string" ||
@@ -194,6 +231,10 @@ app.post(
 
             }
 
+
+            /*
+            ---------- QUESTIONS ----------
+            */
 
             if (
                 !Array.isArray(questions) ||
@@ -224,6 +265,10 @@ app.post(
             }
 
 
+            /*
+            ---------- VALIDATE EACH QUESTION ----------
+            */
+
             for (
                 let i = 0;
                 i < questions.length;
@@ -237,9 +282,7 @@ app.post(
                 if (
                     !q ||
                     typeof q.question !== "string" ||
-                    !q.question.trim() ||
-                    !Array.isArray(q.options) ||
-                    q.options.length < 2
+                    !q.question.trim()
                 ) {
 
                     return res.status(400).json({
@@ -253,14 +296,43 @@ app.post(
 
 
                 if (
+                    !Array.isArray(q.options) ||
+                    q.options.length < 2
+                ) {
+
+                    return res.status(400).json({
+
+                        error:
+                            `Question ${i + 1} must have at least 2 options.`
+
+                    });
+
+                }
+
+
+                if (
                     q.correctAnswer === undefined ||
-                    q.correctAnswer === null ||
-                    !Number.isInteger(
-                        Number(q.correctAnswer)
-                    ) ||
-                    Number(q.correctAnswer) < 0 ||
-                    Number(q.correctAnswer) >=
-                        q.options.length
+                    q.correctAnswer === null
+                ) {
+
+                    return res.status(400).json({
+
+                        error:
+                            `Question ${i + 1} has no correct answer.`
+
+                    });
+
+                }
+
+
+                const answer =
+                    Number(q.correctAnswer);
+
+
+                if (
+                    !Number.isInteger(answer) ||
+                    answer < 0 ||
+                    answer >= q.options.length
                 ) {
 
                     return res.status(400).json({
@@ -275,6 +347,10 @@ app.post(
             }
 
 
+            /*
+            ---------- TIME ----------
+            */
+
             const finalTimeLimit =
                 Math.max(
                     30,
@@ -282,8 +358,11 @@ app.post(
                 );
 
 
-            let shareCode;
+            /*
+            ---------- SHARE CODE ----------
+            */
 
+            let shareCode;
 
             do {
 
@@ -296,14 +375,19 @@ app.post(
                     SELECT id
                     FROM quizzes
                     WHERE share_code = ?
-                `).get(shareCode)
+                `).get(
+                    shareCode
+                )
 
             );
 
 
+            /*
+            ---------- SAVE ----------
+            */
+
             const result =
                 db.prepare(`
-
                     INSERT INTO quizzes
                     (
                         share_code,
@@ -314,7 +398,6 @@ app.post(
                     )
 
                     VALUES (?, ?, ?, ?, ?)
-
                 `).run(
 
                     shareCode,
@@ -331,6 +414,10 @@ app.post(
 
                 );
 
+
+            /*
+            ---------- RESPONSE ----------
+            */
 
             res.json({
 
@@ -370,7 +457,10 @@ app.post(
 
 /*
 =========================================================
-GET QUIZ FOR PARTICIPANT
+GET QUIZ
+=========================================================
+
+Correct answers are NOT sent to participants.
 =========================================================
 */
 
@@ -382,7 +472,6 @@ app.get(
 
             const quiz =
                 db.prepare(`
-
                     SELECT
                         id,
                         title,
@@ -393,7 +482,6 @@ app.get(
                     FROM quizzes
 
                     WHERE share_code = ?
-
                 `).get(
                     req.params.code
                 );
@@ -416,11 +504,6 @@ app.get(
                     quiz.questions
                 );
 
-
-            /*
-            Remove correct answers from
-            participant version.
-            */
 
             const safeQuestions =
                 questions.map(
@@ -494,13 +577,9 @@ app.post(
 
             const quiz =
                 db.prepare(`
-
                     SELECT *
-
                     FROM quizzes
-
                     WHERE share_code = ?
-
                 `).get(
                     req.params.code
                 );
@@ -534,10 +613,7 @@ app.post(
 
 
             /*
-            NAME IS REQUIRED ON SERVER TOO.
-
-            This prevents someone from bypassing
-            the browser validation.
+            ---------- NAME ----------
             */
 
             if (
@@ -549,12 +625,16 @@ app.post(
                 return res.status(400).json({
 
                     error:
-                        "Participant name is required."
+                        "Please enter your name before submitting the quiz."
 
                 });
 
             }
 
+
+            /*
+            ---------- SCORE ----------
+            */
 
             let score = 0;
 
@@ -584,6 +664,10 @@ app.post(
                 questions.length;
 
 
+            /*
+            ---------- ACCURACY ----------
+            */
+
             const accuracy =
                 Number(
                     (
@@ -592,6 +676,10 @@ app.post(
                     ).toFixed(2)
                 );
 
+
+            /*
+            ---------- TIME ----------
+            */
 
             const safeTime =
                 Math.min(
@@ -606,9 +694,12 @@ app.post(
                 );
 
 
+            /*
+            ---------- SAVE ATTEMPT ----------
+            */
+
             const result =
                 db.prepare(`
-
                     INSERT INTO attempts
                     (
                         quiz_id,
@@ -623,7 +714,6 @@ app.post(
                     )
 
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-
                 `).run(
 
                     quiz.id,
@@ -650,6 +740,10 @@ app.post(
 
                 );
 
+
+            /*
+            ---------- RESPONSE ----------
+            */
 
             res.json({
 
@@ -705,13 +799,9 @@ app.get(
 
             const quiz =
                 db.prepare(`
-
                     SELECT *
-
                     FROM quizzes
-
                     WHERE share_code = ?
-
                 `).get(
                     req.params.code
                 );
@@ -730,54 +820,11 @@ app.get(
 
 
             /*
-            -------------------------------------------------
-            QUESTIONS FOR DASHBOARD
-
-            Unlike participant API, the dashboard needs
-            the correct answers.
-            -------------------------------------------------
+            ---------- ATTEMPTS ----------
             */
 
-            const questions =
-                JSON.parse(
-                    quiz.questions
-                );
-
-
-            const dashboardQuestions =
-                questions.map(
-                    (q, index) => ({
-
-                        id:
-                            q.id,
-
-                        number:
-                            index + 1,
-
-                        question:
-                            q.question,
-
-                        options:
-                            q.options,
-
-                        correctAnswer:
-                            Number(
-                                q.correctAnswer
-                            )
-
-                    })
-                );
-
-
-            /*
-            -------------------------------------------------
-            ATTEMPTS
-            -------------------------------------------------
-            */
-
-            const rawAttempts =
+            const attempts =
                 db.prepare(`
-
                     SELECT
 
                         id,
@@ -805,106 +852,27 @@ app.get(
                     WHERE quiz_id = ?
 
                     ORDER BY submitted_at DESC
-
                 `).all(
                     quiz.id
                 );
 
 
             /*
-            Convert stored JSON strings back
-            into JavaScript objects.
+            ---------- QUESTIONS ----------
             */
 
-            const attempts =
-                rawAttempts.map(
-                    attempt => {
-
-                        let answers = {};
-
-                        let questionTimes = {};
-
-
-                        try {
-
-                            answers =
-                                JSON.parse(
-                                    attempt.answers ||
-                                    "{}"
-                                );
-
-                        }
-
-                        catch {
-
-                            answers = {};
-
-                        }
-
-
-                        try {
-
-                            questionTimes =
-                                JSON.parse(
-                                    attempt.question_times ||
-                                    "{}"
-                                );
-
-                        }
-
-                        catch {
-
-                            questionTimes = {};
-
-                        }
-
-
-                        return {
-
-                            id:
-                                attempt.id,
-
-                            participant_name:
-                                attempt.participant_name,
-
-                            answers,
-
-                            score:
-                                attempt.score,
-
-                            total:
-                                attempt.total,
-
-                            accuracy:
-                                attempt.accuracy,
-
-                            time_taken:
-                                attempt.time_taken,
-
-                            question_times:
-                                questionTimes,
-
-                            feedback:
-                                attempt.feedback,
-
-                            submitted_at:
-                                attempt.submitted_at
-
-                        };
-
-                    }
+            const questions =
+                JSON.parse(
+                    quiz.questions
                 );
 
 
             /*
-            -------------------------------------------------
-            STATISTICS
-            -------------------------------------------------
+            ---------- STATISTICS ----------
             */
 
             const statistics =
                 db.prepare(`
-
                     SELECT
 
                         COUNT(*)
@@ -922,16 +890,13 @@ app.get(
                     FROM attempts
 
                     WHERE quiz_id = ?
-
                 `).get(
                     quiz.id
                 );
 
 
             /*
-            -------------------------------------------------
-            RESPONSE
-            -------------------------------------------------
+            ---------- RESPONSE ----------
             */
 
             res.json({
@@ -951,23 +916,30 @@ app.get(
                         quiz.time_limit,
 
                     questionCount:
-                        questions.length
+                        questions.length,
+
+                    questions:
+                        questions.map(
+                            q => ({
+
+                                id:
+                                    q.id,
+
+                                question:
+                                    q.question,
+
+                                options:
+                                    q.options,
+
+                                correctAnswer:
+                                    q.correctAnswer
+
+                            })
+                        )
 
                 },
 
-
-                /*
-                IMPORTANT:
-                Dashboard receives correct answers.
-                Participant API does NOT.
-                */
-
-                questions:
-                    dashboardQuestions,
-
-
                 statistics,
-
 
                 attempts
 
@@ -1009,13 +981,9 @@ app.get(
 
             const quiz =
                 db.prepare(`
-
                     SELECT *
-
                     FROM quizzes
-
                     WHERE share_code = ?
-
                 `).get(
                     req.params.code
                 );
@@ -1034,7 +1002,6 @@ app.get(
 
             const attempts =
                 db.prepare(`
-
                     SELECT
 
                         participant_name,
@@ -1050,7 +1017,6 @@ app.get(
                     WHERE quiz_id = ?
 
                     ORDER BY submitted_at DESC
-
                 `).all(
                     quiz.id
                 );
@@ -1152,13 +1118,9 @@ app.delete(
 
             const quiz =
                 db.prepare(`
-
                     SELECT id
-
                     FROM quizzes
-
                     WHERE share_code = ?
-
                 `).get(
                     req.params.code
                 );
@@ -1176,23 +1138,25 @@ app.delete(
             }
 
 
+            /*
+            Delete attempts first.
+            */
+
             db.prepare(`
-
                 DELETE FROM attempts
-
                 WHERE quiz_id = ?
-
             `).run(
                 quiz.id
             );
 
 
+            /*
+            Delete quiz.
+            */
+
             db.prepare(`
-
                 DELETE FROM quizzes
-
                 WHERE id = ?
-
             `).run(
                 quiz.id
             );
@@ -1229,6 +1193,27 @@ app.delete(
 
 /*
 =========================================================
+404 API HANDLER
+=========================================================
+*/
+
+app.use(
+    "/api",
+    (req, res) => {
+
+        res.status(404).json({
+
+            error:
+                "API endpoint not found."
+
+        });
+
+    }
+);
+
+
+/*
+=========================================================
 START SERVER
 =========================================================
 */
@@ -1238,7 +1223,6 @@ app.listen(
     () => {
 
         console.log(`
-
 ========================================
        🧠 QUIZ PLATFORM
 ========================================
@@ -1253,7 +1237,6 @@ Environment:
 ${process.env.NODE_ENV || "development"}
 
 ========================================
-
         `);
 
     }
