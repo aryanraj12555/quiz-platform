@@ -17,9 +17,35 @@
         href="style.css"
     >
 
+    <style>
+
+        /* =====================================================
+           NAME VALIDATION
+        ===================================================== */
+
+        .name-input.name-error {
+            border: 2px solid #e53935 !important;
+            background: #fff5f5;
+        }
+
+        .name-error-message {
+            display: none;
+            color: #d32f2f;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .name-error-message.show {
+            display: block;
+        }
+
+    </style>
+
 </head>
 
+
 <body>
+
 
 <!-- =====================================================
      TIMER
@@ -45,23 +71,22 @@
 </div>
 
 
+<!-- =====================================================
+     QUIZ
+===================================================== -->
+
 <main class="container quiz-container">
 
-    <div id="quiz">
-
-        <div class="result-box">
-            <h2>⏳ Loading quiz...</h2>
-        </div>
-
-    </div>
+    <div id="quiz"></div>
 
 </main>
 
 
 <script>
 
+
 /* =====================================================
-   QUIZ CODE
+   QUIZ VARIABLES
 ===================================================== */
 
 const code =
@@ -72,7 +97,7 @@ const code =
 
 let quiz = null;
 
-let startTime = 0;
+let startTime = null;
 
 let timerInterval = null;
 
@@ -84,6 +109,8 @@ let submitted = false;
 ===================================================== */
 
 const questionStartTimes = {};
+
+const questionTimes = {};
 
 
 /* =====================================================
@@ -143,10 +170,14 @@ async function loadQuiz() {
 
     catch (error) {
 
-        console.error(error);
+        console.error(
+            "LOAD QUIZ ERROR:",
+            error
+        );
+
 
         showError(
-            "Unable to connect to the quiz server."
+            "Unable to load the quiz. Please try again."
         );
 
     }
@@ -179,16 +210,14 @@ function renderQuiz() {
 
             ${
                 quiz.description
-                ?
-                `
+                ? `
                     <p>
                         ${escapeHTML(
                             quiz.description
                         )}
                     </p>
                 `
-                :
-                ""
+                : ""
             }
 
 
@@ -202,9 +231,11 @@ function renderQuiz() {
         </div>
 
 
-        <!-- PARTICIPANT NAME -->
+        <!-- =================================================
+             PARTICIPANT NAME
+        ================================================= -->
 
-        <div class="card">
+        <div class="name-section">
 
             <label
                 for="participant"
@@ -214,9 +245,7 @@ function renderQuiz() {
                     margin-bottom:8px;
                 "
             >
-
                 👤 Your Name
-
             </label>
 
 
@@ -227,32 +256,24 @@ function renderQuiz() {
                 placeholder="Enter your name"
                 autocomplete="name"
                 maxlength="100"
-                required
             >
 
 
-            <p
+            <div
                 id="nameError"
-                style="
-                    display:none;
-                    color:#c62828;
-                    margin-top:7px;
-                    font-weight:600;
-                "
+                class="name-error-message"
             >
-
-                Please enter your name before submitting.
-
-            </p>
+                ⚠️ Please enter your name before submitting.
+            </div>
 
         </div>
 
     `;
 
 
-    /* =================================================
+    /* =====================================================
        QUESTIONS
-    ================================================= */
+    ===================================================== */
 
     quiz.questions.forEach(
         (q, index) => {
@@ -300,9 +321,11 @@ function renderQuiz() {
                                         String(q.id)
                                     )}"
                                     value="${i}"
-                                    onchange="questionAnswered(
-                                        ${JSON.stringify(q.id)}
-                                    )"
+                                    onchange="
+                                        questionAnswered(
+                                            ${JSON.stringify(q.id)}
+                                        )
+                                    "
                                 >
 
 
@@ -329,9 +352,9 @@ function renderQuiz() {
     );
 
 
-    /* =================================================
+    /* =====================================================
        FEEDBACK + SUBMIT
-    ================================================= */
+    ===================================================== */
 
     html += `
 
@@ -368,9 +391,9 @@ function renderQuiz() {
         html;
 
 
-    /* =================================================
+    /* =====================================================
        NAME INPUT EVENTS
-    ================================================= */
+    ===================================================== */
 
     const participantInput =
         document.getElementById(
@@ -382,21 +405,13 @@ function renderQuiz() {
         "input",
         function () {
 
-            const nameError =
-                document.getElementById(
-                    "nameError"
-                );
+            const name =
+                participantInput.value.trim();
 
 
-            if (
-                participantInput.value.trim()
-            ) {
+            if (name) {
 
-                nameError.style.display =
-                    "none";
-
-                participantInput.style.border =
-                    "";
+                clearNameError();
 
             }
 
@@ -407,11 +422,6 @@ function renderQuiz() {
     participantInput.addEventListener(
         "keydown",
         function (event) {
-
-            /*
-             Prevent accidental form-like
-             submission if Enter is pressed.
-            */
 
             if (
                 event.key === "Enter"
@@ -451,7 +461,7 @@ function questionAnswered(
 
 
 /* =====================================================
-   CALCULATE QUESTION TIMES
+   QUESTION TIMES
 ===================================================== */
 
 function calculateQuestionTimes() {
@@ -502,7 +512,7 @@ function startTimer() {
     let remaining =
         Number(
             quiz.timeLimit
-        ) || 0;
+        ) || 600;
 
 
     updateTimer(
@@ -531,9 +541,15 @@ function startTimer() {
                     );
 
 
-                    submitQuiz(
-                        true
-                    );
+                    /*
+                       Timer has expired.
+
+                       We still check the name.
+                       If no name was entered, the quiz
+                       will NOT be submitted anonymously.
+                    */
+
+                    submitQuiz(true);
 
                 }
 
@@ -578,9 +594,7 @@ function updateTimer(
     if (timer) {
 
         timer.textContent =
-            `${String(minutes)
-                .padStart(2, "0")}:${String(secs)
-                .padStart(2, "0")}`;
+            `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 
     }
 
@@ -606,6 +620,105 @@ function updateTimer(
 
 
 /* =====================================================
+   NAME VALIDATION
+===================================================== */
+
+function validateParticipantName() {
+
+    const input =
+        document.getElementById(
+            "participant"
+        );
+
+
+    if (!input) {
+
+        return false;
+
+    }
+
+
+    const name =
+        input.value.trim();
+
+
+    if (!name) {
+
+        input.classList.add(
+            "name-error"
+        );
+
+
+        const error =
+            document.getElementById(
+                "nameError"
+            );
+
+
+        if (error) {
+
+            error.classList.add(
+                "show"
+            );
+
+        }
+
+
+        input.focus();
+
+
+        return false;
+
+    }
+
+
+    clearNameError();
+
+
+    return true;
+
+}
+
+
+/* =====================================================
+   CLEAR NAME ERROR
+===================================================== */
+
+function clearNameError() {
+
+    const input =
+        document.getElementById(
+            "participant"
+        );
+
+
+    if (input) {
+
+        input.classList.remove(
+            "name-error"
+        );
+
+    }
+
+
+    const error =
+        document.getElementById(
+            "nameError"
+        );
+
+
+    if (error) {
+
+        error.classList.remove(
+            "show"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
    SUBMIT QUIZ
 ===================================================== */
 
@@ -621,12 +734,7 @@ async function submitQuiz(
 
 
     /* =================================================
-       CHECK NAME FIRST
-       
-       IMPORTANT:
-       Automatic submission after timer expiry is
-       allowed to proceed. Manual submission requires
-       a name.
+       NAME MUST BE ENTERED
     ================================================= */
 
     const participantInput =
@@ -641,38 +749,30 @@ async function submitQuiz(
             .trim() || "";
 
 
-    if (
-        !autoSubmit &&
-        !participantName
-    ) {
+    if (!participantName) {
 
-        const nameError =
-            document.getElementById(
-                "nameError"
+        /*
+           Do NOT set submitted = true.
+
+           This means the participant can enter their
+           name and submit again.
+        */
+
+        validateParticipantName();
+
+
+        /*
+           If the timer expired, tell the participant
+           that their name is still required.
+        */
+
+        if (autoSubmit) {
+
+            alert(
+                "Time is up, but your quiz cannot be submitted until you enter your name."
             );
 
-
-        if (nameError) {
-
-            nameError.style.display =
-                "block";
-
         }
-
-
-        if (participantInput) {
-
-            participantInput.focus();
-
-            participantInput.style.border =
-                "2px solid #c62828";
-
-        }
-
-
-        alert(
-            "Please enter your name before submitting the quiz."
-        );
 
 
         return;
@@ -680,14 +780,11 @@ async function submitQuiz(
     }
 
 
-    /*
-       For automatic submission, use Anonymous
-       only if the participant left the name blank.
-    */
+    /* =================================================
+       VALID NAME
+    ================================================= */
 
-    const finalParticipantName =
-        participantName ||
-        "Anonymous";
+    clearNameError();
 
 
     submitted = true;
@@ -710,9 +807,7 @@ async function submitQuiz(
 
             const selected =
                 document.querySelector(
-                    `input[name="q-${CSS.escape(
-                        String(q.id)
-                    )}"]:checked`
+                    `input[name="q-${CSS.escape(String(q.id))}"]:checked`
                 );
 
 
@@ -736,16 +831,15 @@ async function submitQuiz(
     const timeTaken =
         Math.min(
 
-            quiz.timeLimit,
+            Number(
+                quiz.timeLimit
+            ) || 600,
 
-            Math.max(
-                0,
-                Math.floor(
-                    (
-                        Date.now() -
-                        startTime
-                    ) / 1000
-                )
+            Math.floor(
+                (
+                    Date.now() -
+                    startTime
+                ) / 1000
             )
 
         );
@@ -765,7 +859,7 @@ async function submitQuiz(
 
 
     /* =================================================
-       BUTTON
+       SUBMIT BUTTON
     ================================================= */
 
     const button =
@@ -779,11 +873,16 @@ async function submitQuiz(
         button.disabled =
             true;
 
+
         button.textContent =
             "Submitting...";
 
     }
 
+
+    /* =================================================
+       SEND TO SERVER
+    ================================================= */
 
     try {
 
@@ -792,7 +891,8 @@ async function submitQuiz(
                 `/api/quizzes/${encodeURIComponent(code)}/submit`,
                 {
 
-                    method: "POST",
+                    method:
+                        "POST",
 
                     headers: {
 
@@ -804,24 +904,16 @@ async function submitQuiz(
                     body:
                         JSON.stringify({
 
-                            participantName:
-                                finalParticipantName,
+                            participantName,
 
-                            answers:
-
-                                answers,
+                            answers,
 
                             questionTimes:
-
                                 calculateQuestionTimes(),
 
-                            timeTaken:
+                            timeTaken,
 
-                                timeTaken,
-
-                            feedback:
-
-                                feedback
+                            feedback
 
                         })
 
@@ -853,7 +945,7 @@ async function submitQuiz(
     catch (error) {
 
         console.error(
-            "SUBMISSION ERROR:",
+            "SUBMIT QUIZ ERROR:",
             error
         );
 
@@ -865,6 +957,7 @@ async function submitQuiz(
 
             button.disabled =
                 false;
+
 
             button.textContent =
                 "Submit Quiz";
@@ -883,13 +976,18 @@ async function submitQuiz(
 
 
 /* =====================================================
-   SHOW RESULT
+   RESULT
 ===================================================== */
 
 function showResult(
     result,
     autoSubmit
 ) {
+
+    clearInterval(
+        timerInterval
+    );
+
 
     const timerBar =
         document.getElementById(
@@ -917,31 +1015,27 @@ function showResult(
 
             ${
                 autoSubmit
-                ?
-                `
+                ? `
                     <div class="time-up">
 
                         ⏰ Time's up!
 
                     </div>
                 `
-                :
-                ""
+                : ""
             }
 
 
             <h1>
-
                 🎉 Quiz Completed!
-
             </h1>
 
 
             <div class="score-circle">
 
-                ${Number(result.score) || 0}
+                ${result.score}
                 /
-                ${Number(result.total) || 0}
+                ${result.total}
 
             </div>
 
@@ -949,7 +1043,7 @@ function showResult(
             <h2>
 
                 Accuracy:
-                ${Number(result.accuracy) || 0}%
+                ${result.accuracy}%
 
             </h2>
 
@@ -961,9 +1055,7 @@ function showResult(
                 <strong>
 
                     ${formatTime(
-                        Number(
-                            result.timeTaken
-                        ) || 0
+                        result.timeTaken
                     )}
 
                 </strong>
@@ -1001,17 +1093,19 @@ function showError(
         );
 
 
+    if (!quizContainer) {
+
+        return;
+
+    }
+
+
     quizContainer.innerHTML = `
 
         <div class="result-box">
 
             <h2>
-
-                ❌
-                ${escapeHTML(
-                    message
-                )}
-
+                ❌ ${escapeHTML(message)}
             </h2>
 
         </div>
@@ -1046,12 +1140,9 @@ function formatTime(
         seconds % 60;
 
 
-    return (
-        `${minutes}m ` +
-        `${String(
-            remaining
-        ).padStart(2, "0")}s`
-    );
+    return `${minutes}m ${String(
+        remaining
+    ).padStart(2, "0")}s`;
 
 }
 
@@ -1088,4 +1179,5 @@ loadQuiz();
 </script>
 
 </body>
+
 </html>
