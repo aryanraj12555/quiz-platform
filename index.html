@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -18,85 +17,785 @@
         href="style.css"
     >
 
+    <style>
+
+        /* =====================================================
+           QUIZHUB HOME
+        ===================================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        .qh-page {
+            min-height: 100vh;
+        }
+
+        /* =====================================================
+           NAVBAR
+        ===================================================== */
+
+        .qh-navbar {
+            width: 100%;
+            padding: 15px 6%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            background: white;
+            border-bottom: 1px solid #eeeeee;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .qh-logo {
+            margin: 0;
+            font-size: 22px;
+            white-space: nowrap;
+        }
+
+        .qh-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qh-nav a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .qh-nav-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 15px;
+            border-radius: 9px;
+            font-weight: 700;
+            font-size: 14px;
+            background: #6c63ff;
+            color: white !important;
+        }
+
+        .qh-nav-button:hover {
+            opacity: .9;
+        }
+
+        /* =====================================================
+           HERO
+        ===================================================== */
+
+        .qh-hero {
+            width: 100%;
+            max-width: 1000px;
+            margin: auto;
+            padding: 75px 20px 55px;
+            text-align: center;
+        }
+
+        .qh-hero-badge {
+            display: inline-block;
+            padding: 7px 13px;
+            border-radius: 30px;
+            background: #f0efff;
+            color: #574eea;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .qh-hero h1 {
+            margin: 0;
+            font-size: clamp(34px, 6vw, 58px);
+            line-height: 1.1;
+        }
+
+        .qh-hero h1 span {
+            color: #6c63ff;
+        }
+
+        .qh-hero p {
+            max-width: 650px;
+            margin: 18px auto 0;
+            color: #666;
+            font-size: 17px;
+            line-height: 1.6;
+        }
+
+        /* =====================================================
+           MAIN BUTTONS
+        ===================================================== */
+
+        .qh-hero-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .qh-main-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 170px;
+            padding: 13px 20px;
+            border-radius: 11px;
+            text-decoration: none;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .qh-primary {
+            background: #6c63ff;
+            color: white;
+        }
+
+        .qh-secondary {
+            background: #eeeeee;
+            color: #222;
+        }
+
+        .qh-main-button:hover {
+            transform: translateY(-1px);
+        }
+
+        /* =====================================================
+           FEATURES
+        ===================================================== */
+
+        .qh-features {
+            width: 100%;
+            max-width: 1050px;
+            margin: 0 auto;
+            padding: 15px 20px 55px;
+
+            display: grid;
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 18px;
+        }
+
+        .qh-card {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+
+            border: 1px solid #eeeeee;
+
+            box-shadow:
+                0 5px 25px rgba(0, 0, 0, .06);
+
+            transition:
+                transform .2s,
+                box-shadow .2s;
+        }
+
+        .qh-card:hover {
+            transform: translateY(-4px);
+
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, .10);
+        }
+
+        .qh-card-icon {
+            font-size: 34px;
+            margin-bottom: 10px;
+        }
+
+        .qh-card h2 {
+            margin: 0 0 8px;
+            font-size: 20px;
+        }
+
+        .qh-card p {
+            margin: 0;
+            color: #777;
+            line-height: 1.55;
+            font-size: 14px;
+        }
+
+        .qh-card-action {
+            display: inline-block;
+            margin-top: 15px;
+            color: #5a52e8;
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        /* =====================================================
+           JOIN / DASHBOARD SECTION
+        ===================================================== */
+
+        .qh-tools {
+            width: 100%;
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 0 20px 65px;
+
+            display: grid;
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 18px;
+        }
+
+        .qh-tool {
+            background: white;
+            border: 1px solid #eeeeee;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow:
+                0 5px 25px rgba(0, 0, 0, .05);
+        }
+
+        .qh-tool h2 {
+            margin-top: 0;
+            margin-bottom: 7px;
+        }
+
+        .qh-tool p {
+            color: #777;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .qh-code-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .qh-code-input {
+            flex: 1;
+            min-width: 0;
+
+            padding: 12px;
+
+            border: 1px solid #d8d8d8;
+            border-radius: 9px;
+
+            font-size: 15px;
+            outline: none;
+        }
+
+        .qh-code-input:focus {
+            border-color: #6c63ff;
+        }
+
+        .qh-code-button {
+            border: none;
+            border-radius: 9px;
+
+            padding: 12px 16px;
+
+            font-weight: 800;
+            cursor: pointer;
+
+            background: #6c63ff;
+            color: white;
+
+            white-space: nowrap;
+        }
+
+        .qh-code-button:hover {
+            opacity: .9;
+        }
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
+
+        .qh-footer {
+            text-align: center;
+            padding: 25px 15px;
+            color: #888;
+            font-size: 13px;
+            border-top: 1px solid #eeeeee;
+        }
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 700px) {
+
+            .qh-navbar {
+                padding: 13px 15px;
+            }
+
+            .qh-logo {
+                font-size: 19px;
+            }
+
+            .qh-nav-button {
+                padding: 8px 11px;
+                font-size: 13px;
+            }
+
+            .qh-hero {
+                padding:
+                    55px 17px
+                    40px;
+            }
+
+            .qh-hero p {
+                font-size: 15px;
+            }
+
+            .qh-hero-actions {
+                flex-direction: column;
+            }
+
+            .qh-main-button {
+                width: 100%;
+            }
+
+            .qh-features {
+                grid-template-columns: 1fr;
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            .qh-tools {
+                grid-template-columns: 1fr;
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            .qh-code-row {
+                flex-direction: column;
+            }
+
+            .qh-code-button {
+                width: 100%;
+            }
+
+        }
+
+        @media (max-width: 400px) {
+
+            .qh-nav-button {
+                font-size: 12px;
+                padding: 8px 9px;
+            }
+
+            .qh-hero h1 {
+                font-size: 32px;
+            }
+
+        }
+
+    </style>
+
 </head>
+
 
 <body>
 
-<header class="navbar">
-
-    <h2>🧠 QuizHub</h2>
-
-    <a href="create.html">
-        Create Quiz
-    </a>
-
-</header>
+<div class="qh-page">
 
 
-<main>
+    <!-- =====================================================
+         NAVBAR
+    ====================================================== -->
 
-    <section class="hero">
+    <header class="qh-navbar">
 
-        <h1>
-            Create. Share. Analyze.
-        </h1>
-
-        <p>
-            Import your questions,
-            create a quiz and share it.
-        </p>
-
-        <a href="create.html">
-
-            <button>
-                📥 Import Questions
-            </button>
-
-        </a>
-
-    </section>
+        <h2 class="qh-logo">
+            🧠 QuizHub
+        </h2>
 
 
-    <section class="features">
+        <nav class="qh-nav">
 
-        <div class="card">
+            <a
+                href="create.html"
+                class="qh-nav-button"
+            >
+                ➕ Create Quiz
+            </a>
 
-            <h2>📥 Import</h2>
+        </nav>
+
+    </header>
+
+
+    <!-- =====================================================
+         HERO
+    ====================================================== -->
+
+    <main>
+
+        <section class="qh-hero">
+
+            <div class="qh-hero-badge">
+                🧠 Simple • Fast • Shareable
+            </div>
+
+
+            <h1>
+                Create.
+                <span>Share.</span>
+                Analyze.
+            </h1>
+
 
             <p>
-                Import your questions
-                using a JSON file.
+                Import your own questions,
+                create a timed quiz, share it
+                with others and analyze their
+                performance.
             </p>
 
-        </div>
+
+            <div class="qh-hero-actions">
+
+                <a
+                    href="create.html"
+                    class="qh-main-button qh-primary"
+                >
+                    📥 Create a Quiz
+                </a>
 
 
-        <div class="card">
+                <a
+                    href="#join"
+                    class="qh-main-button qh-secondary"
+                >
+                    🔗 Join a Quiz
+                </a>
 
-            <h2>🔗 Share</h2>
+            </div>
 
-            <p>
-                Every quiz gets its own
-                unique shareable link.
-            </p>
-
-        </div>
+        </section>
 
 
-        <div class="card">
+        <!-- =================================================
+             FEATURES
+        ================================================== -->
 
-            <h2>📊 Analyze</h2>
+        <section class="qh-features">
 
-            <p>
-                See scores, accuracy,
-                time and feedback.
-            </p>
 
-        </div>
+            <a
+                href="create.html"
+                class="qh-card"
+            >
 
-    </section>
+                <div class="qh-card-icon">
+                    📥
+                </div>
 
-</main>
+                <h2>
+                    Import Questions
+                </h2>
+
+                <p>
+                    Import a JSON file containing
+                    your questions and answers.
+                    Create a completely new quiz
+                    whenever you want.
+                </p>
+
+                <span class="qh-card-action">
+                    Create Quiz →
+                </span>
+
+            </a>
+
+
+            <a
+                href="#join"
+                class="qh-card"
+            >
+
+                <div class="qh-card-icon">
+                    🔗
+                </div>
+
+                <h2>
+                    Join a Quiz
+                </h2>
+
+                <p>
+                    Enter a quiz code and start
+                    taking a quiz shared with you.
+                </p>
+
+                <span class="qh-card-action">
+                    Enter Quiz →
+                </span>
+
+            </a>
+
+
+            <a
+                href="#results"
+                class="qh-card"
+            >
+
+                <div class="qh-card-icon">
+                    📊
+                </div>
+
+                <h2>
+                    Analyze Results
+                </h2>
+
+                <p>
+                    View participant scores,
+                    accuracy, time taken and
+                    feedback.
+                </p>
+
+                <span class="qh-card-action">
+                    View Results →
+                </span>
+
+            </a>
+
+
+        </section>
+
+
+        <!-- =================================================
+             TOOLS
+        ================================================== -->
+
+        <section class="qh-tools">
+
+
+            <!-- JOIN -->
+
+            <div
+                id="join"
+                class="qh-tool"
+            >
+
+                <h2>
+                    🔗 Join a Quiz
+                </h2>
+
+                <p>
+                    Enter the quiz code provided
+                    by the quiz creator.
+                </p>
+
+
+                <div class="qh-code-row">
+
+                    <input
+                        id="joinCode"
+                        class="qh-code-input"
+                        type="text"
+                        placeholder="Enter quiz code"
+                        autocomplete="off"
+                    >
+
+
+                    <button
+                        class="qh-code-button"
+                        type="button"
+                        onclick="joinQuiz()"
+                    >
+                        Start Quiz
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- RESULTS -->
+
+            <div
+                id="results"
+                class="qh-tool"
+            >
+
+                <h2>
+                    📊 View Results
+                </h2>
+
+                <p>
+                    Enter the quiz code to open
+                    the creator's dashboard and
+                    see participant results.
+                </p>
+
+
+                <div class="qh-code-row">
+
+                    <input
+                        id="dashboardCode"
+                        class="qh-code-input"
+                        type="text"
+                        placeholder="Enter quiz code"
+                        autocomplete="off"
+                    >
+
+
+                    <button
+                        class="qh-code-button"
+                        type="button"
+                        onclick="openDashboard()"
+                    >
+                        Dashboard
+                    </button>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+    </main>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer class="qh-footer">
+
+        🧠 QuizHub
+        • Create quizzes
+        • Share them
+        • Analyze results
+
+    </footer>
+
+
+</div>
+
+
+<script>
+
+    /* =====================================================
+       JOIN QUIZ
+    ===================================================== */
+
+    function joinQuiz() {
+
+        const input =
+            document.getElementById(
+                "joinCode"
+            );
+
+
+        const code =
+            input.value.trim();
+
+
+        if (!code) {
+
+            alert(
+                "Please enter a quiz code."
+            );
+
+            input.focus();
+
+            return;
+
+        }
+
+
+        window.location.href =
+            `quiz.html?code=${encodeURIComponent(code)}`;
+
+    }
+
+
+    /* =====================================================
+       OPEN DASHBOARD
+    ===================================================== */
+
+    function openDashboard() {
+
+        const input =
+            document.getElementById(
+                "dashboardCode"
+            );
+
+
+        const code =
+            input.value.trim();
+
+
+        if (!code) {
+
+            alert(
+                "Please enter a quiz code."
+            );
+
+            input.focus();
+
+            return;
+
+        }
+
+
+        window.location.href =
+            `dashboard.html?code=${encodeURIComponent(code)}`;
+
+    }
+
+
+    /* =====================================================
+       ENTER KEY SUPPORT
+    ===================================================== */
+
+    document
+        .getElementById("joinCode")
+        .addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    joinQuiz();
+
+                }
+
+            }
+        );
+
+
+    document
+        .getElementById("dashboardCode")
+        .addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    openDashboard();
+
+                }
+
+            }
+        );
+
+</script>
+
 
 </body>
 
