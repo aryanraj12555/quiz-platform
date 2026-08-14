@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Quiz</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* =====================================================
+           CREATE QUIZ PAGE
+           Everything is scoped to #createQuizPage
+        ===================================================== */
+
+        #createQuizPage {
+            min-height: 100vh;
+            padding: 24px 15px 50px;
+        }
+
+        #createQuizPage .cq-container {
+            width: 100%;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        #createQuizPage .cq-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 22px;
+        }
+
+        #createQuizPage .cq-title {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        #createQuizPage .cq-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 18px;
+            box-shadow: 0 5px 25px rgba(0,0,0,.07);
+        }
+
+        #createQuizPage .cq-card h2 {
+            margin-top: 0;
+            margin-bottom: 7px;
+        }
+
+        #createQuizPage .cq-muted {
+            color: #777;
+            margin-top: 0;
+        }
+
+        #createQuizPage .cq-field {
+            margin-top: 17px;
+        }
+
+        #createQuizPage .cq-field label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+
+        #createQuizPage .cq-input,
+        #createQuizPage .cq-textarea {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #d7d7d7;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            background: #fff;
+        }
+
+        #createQuizPage .cq-input:focus,
+        #createQuizPage .cq-textarea:focus {
+            border-color: #6c63ff;
+        }
+
+        #createQuizPage .cq-textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        #createQuizPage .cq-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        /* Upload */
+
+        #createQuizPage .cq-upload {
+            border: 2px dashed #c9c9c9;
+            border-radius: 14px;
+            padding: 28px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        #createQuizPage .cq-upload:hover {
+            border-color: #6c63ff;
+            background: #faf9ff;
+        }
+
+        #createQuizPage .cq-upload-icon {
+            font-size: 38px;
+        }
+
+        #createQuizPage .cq-upload-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 7px;
+        }
+
+        #createQuizPage .cq-upload-subtitle {
+            color: #777;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        #createQuizPage #cqJsonFile {
+            display: none;
+        }
+
+        #createQuizPage .cq-file {
+            display: none;
+            margin-top: 12px;
+            padding: 10px;
+            background: #f3f3f3;
+            border-radius: 8px;
+            word-break: break-word;
+        }
+
+        /* Buttons */
+
+        #createQuizPage .cq-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        #createQuizPage .cq-btn {
+            border: none;
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #createQuizPage .cq-primary {
+            background: #6c63ff;
+            color: white;
+        }
+
+        #createQuizPage .cq-primary:hover {
+            background: #574eea;
+        }
+
+        #createQuizPage .cq-secondary {
+            background: #ededed;
+            color: #222;
+        }
+
+        #createQuizPage .cq-success {
+            background: #168a4a;
+            color: white;
+        }
+
+        #createQuizPage .cq-dark {
+            background: #222;
+            color: white;
+        }
+
+        #createQuizPage .cq-btn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        /* Status */
+
+        #createQuizPage .cq-status {
+            display: none;
+            padding: 13px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-weight: 600;
+        }
+
+        #createQuizPage .cq-status.show {
+            display: block;
+        }
+
+        #createQuizPage .cq-status.error {
+            background: #fff0f0;
+            color: #a51d1d;
+        }
+
+        #createQuizPage .cq-status.success {
+            background: #eaf8ef;
+            color: #126b38;
+        }
+
+        #createQuizPage .cq-status.info {
+            background: #eef4ff;
+            color: #2453a6;
+        }
+
+        /* Preview */
+
+        #createQuizPage #cqPreview {
+            display: none;
+        }
+
+        #createQuizPage #cqPreview.show {
+            display: block;
+        }
+
+        #createQuizPage .cq-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        #createQuizPage .cq-summary-box {
+            background: #f5f5f5;
+            border-radius: 11px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        #createQuizPage .cq-summary-number {
+            display: block;
+            font-size: 23px;
+            font-weight: 800;
+        }
+
+        #createQuizPage .cq-summary-label {
+            color: #777;
+            font-size: 13px;
+        }
+
+        #createQuizPage .cq-question {
+            border: 1px solid #e1e1e1;
+            border-radius: 13px;
+            padding: 17px;
+            margin-bottom: 13px;
+        }
+
+        #createQuizPage .cq-question-number {
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        #createQuizPage .cq-question-text {
+            font-weight: 700;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        #createQuizPage .cq-option {
+            padding: 9px 11px;
+            margin: 6px 0;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        #createQuizPage .cq-option.correct {
+            background: #eaf8ef;
+            border-left: 4px solid #168a4a;
+            font-weight: 700;
+        }
+
+        /* Published */
+
+        #createQuizPage #cqPublished {
+            display: none;
+        }
+
+        #createQuizPage #cqPublished.show {
+            display: block;
+        }
+
+        #createQuizPage .cq-success-icon {
+            font-size: 50px;
+            text-align: center;
+        }
+
+        #createQuizPage .cq-published-title {
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        #createQuizPage .cq-share-box {
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 18px;
+        }
+
+        #createQuizPage .cq-share-label {
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        #createQuizPage .cq-share-row {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        #createQuizPage #cqShareLink {
+            flex: 1;
+            min-width: 0;
+            padding: 12px;
+            background: white;
+            border: 1px solid #d6d6d6;
+            border-radius: 9px;
+            overflow-wrap: anywhere;
+        }
+
+        #createQuizPage #cqShareLink a {
+            color: #5148e8;
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+        /* Loading */
+
+        #createQuizPage .cq-loading {
+            display: none;
+            text-align: center;
+            padding-top: 15px;
+        }
+
+        #createQuizPage .cq-loading.show {
+            display: block;
+        }
+
+        /* Mobile */
+
+        @media (max-width: 650px) {
+
+            #createQuizPage {
+                padding: 15px 10px 35px;
+            }
+
+            #createQuizPage .cq-card {
+                padding: 17px;
+            }
+
+            #createQuizPage .cq-title {
+                font-size: 24px;
+            }
+
+            #createQuizPage .cq-header {
+                align-items: flex-start;
+            }
+
+            #createQuizPage .cq-row {
+                grid-template-columns: 1fr;
+            }
+
+            #createQuizPage .cq-summary {
+                grid-template-columns: 1fr;
+            }
+
+            #createQuizPage .cq-share-row {
+                flex-direction: column;
+            }
+
+            #createQuizPage .cq-buttons {
+                flex-direction: column;
+            }
+
+            #createQuizPage .cq-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="createQuizPage">
+
+    <div class="cq-container">
+
+        <!-- HEADER -->
+        <div class="cq-header">
+
+            <h1 class="cq-title">
+                🧠 Create Quiz
+            </h1>
+
+            <a href="/" class="cq-btn cq-secondary">
+                ← Home
+            </a>
+
+        </div>
+
+
+        <!-- STATUS -->
+        <div id="cqStatus" class="cq-status"></div>
+
+
+        <!-- QUIZ DETAILS -->
+        <div class="cq-card">
+
+            <h2>📝 Quiz Details</h2>
+
+            <p class="cq-muted">
+                Import your questions and create a new quiz.
+            </p>
+
+
+            <div class="cq-field">
+
+                <label for="cqTitle">
+                    Quiz Title
+                </label>
+
+                <input
+                    id="cqTitle"
+                    class="cq-input"
+                    type="text"
+                    placeholder="Example: JEE Physics Test 1"
+                >
+
+            </div>
+
+
+            <div class="cq-field">
+
+                <label for="cqDescription">
+                    Description
+                </label>
+
+                <textarea
+                    id="cqDescription"
+                    class="cq-textarea"
+                    placeholder="Optional quiz description"
+                ></textarea>
+
+            </div>
+
+
+            <div class="cq-row">
+
+                <div class="cq-field">
+
+                    <label for="cqMinutes">
+                        ⏱️ Minutes
+                    </label>
+
+                    <input
+                        id="cqMinutes"
+                        class="cq-input"
+                        type="number"
+                        min="0"
+                        value="30"
+                    >
+
+                </div>
+
+
+                <div class="cq-field">
+
+                    <label for="cqSeconds">
+                        Seconds
+                    </label>
+
+                    <input
+                        id="cqSeconds"
+                        class="cq-input"
+                        type="number"
+                        min="0"
+                        max="59"
+                        value="0"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- IMPORT -->
+        <div class="cq-card">
+
+            <h2>📥 Import Questions</h2>
+
+            <p class="cq-muted">
+                Select the JSON file containing your questions.
+            </p>
+
+
+            <label
+                for="cqJsonFile"
+                class="cq-upload"
+            >
+
+                <div class="cq-upload-icon">
+                    📄
+                </div>
+
+                <div class="cq-upload-title">
+                    Choose JSON File
+                </div>
+
+                <div class="cq-upload-subtitle">
+                    Click here to import your questions
+                </div>
+
+            </label>
+
+
+            <input
+                id="cqJsonFile"
+                type="file"
+                accept=".json,application/json"
+            >
+
+
+            <div
+                id="cqFileName"
+                class="cq-file"
+            ></div>
+
+        </div>
+
+
+        <!-- PREVIEW -->
+        <div
+            id="cqPreview"
+            class="cq-card"
+        >
+
+            <h2>👀 Preview</h2>
+
+            <p class="cq-muted">
+                Check the questions and correct answers before publishing.
+            </p>
+
+
+            <div class="cq-summary">
+
+                <div class="cq-summary-box">
+
+                    <span
+                        id="cqQuestionCount"
+                        class="cq-summary-number"
+                    >
+                        0
+                    </span>
+
+                    <span class="cq-summary-label">
+                        Questions
+                    </span>
+
+                </div>
+
+
+                <div class="cq-summary-box">
+
+                    <span
+                        id="cqTimerSummary"
+                        class="cq-summary-number"
+                    >
+                        30:00
+                    </span>
+
+                    <span class="cq-summary-label">
+                        Time
+                    </span>
+
+                </div>
+
+
+                <div class="cq-summary-box">
+
+                    <span
+                        id="cqTitleSummary"
+                        class="cq-summary-number"
+                    >
+                        —
+                    </span>
+
+                    <span class="cq-summary-label">
+                        Quiz
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div id="cqQuestions"></div>
+
+
+            <div class="cq-buttons">
+
+                <button
+                    id="cqPublish"
+                    class="cq-btn cq-primary"
+                    type="button"
+                >
+                    🚀 Publish Quiz
+                </button>
+
+
+                <button
+                    id="cqClear"
+                    class="cq-btn cq-secondary"
+                    type="button"
+                >
+                    🗑️ Clear
+                </button>
+
+            </div>
+
+
+            <div
+                id="cqLoading"
+                class="cq-loading"
+            >
+                ⏳ Publishing quiz...
+            </div>
+
+        </div>
+
+
+        <!-- PUBLISHED RESULT -->
+        <div
+            id="cqPublished"
+            class="cq-card"
+        >
+
+            <div class="cq-success-icon">
+                🎉
+            </div>
+
+            <h2 class="cq-published-title">
+                Quiz Published Successfully!
+            </h2>
+
+
+            <div class="cq-share-box">
+
+                <div class="cq-share-label">
+                    🔗 Shareable Quiz Link
+                </div>
+
+
+                <div class="cq-share-row">
+
+                    <div id="cqShareLink"></div>
+
+                    <button
+                        id="cqCopy"
+                        class="cq-btn cq-dark"
+                        type="button"
+                    >
+                        📋 Copy
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="cq-buttons">
+
+                <a
+                    id="cqOpenQuiz"
+                    class="cq-btn cq-success"
+                    href="#"
+                    target="_blank"
+                >
+                    🔗 Open Quiz
+                </a>
+
+
+                <a
+                    id="cqDashboard"
+                    class="cq-btn cq-primary"
+                    href="#"
+                    target="_blank"
+                >
+                    📊 View Dashboard
+                </a>
+
+
+                <button
+                    id="cqNewQuiz"
+                    class="cq-btn cq-secondary"
+                    type="button"
+                >
+                    ➕ Create Another Quiz
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+let quizData = null;
+let publishedShareCode = null;
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const fileInput =
+    document.getElementById("cqJsonFile");
+
+const fileName =
+    document.getElementById("cqFileName");
+
+const titleInput =
+    document.getElementById("cqTitle");
+
+const descriptionInput =
+    document.getElementById("cqDescription");
+
+const minutesInput =
+    document.getElementById("cqMinutes");
+
+const secondsInput =
+    document.getElementById("cqSeconds");
+
+const preview =
+    document.getElementById("cqPreview");
+
+const questionsContainer =
+    document.getElementById("cqQuestions");
+
+const questionCount =
+    document.getElementById("cqQuestionCount");
+
+const timerSummary =
+    document.getElementById("cqTimerSummary");
+
+const titleSummary =
+    document.getElementById("cqTitleSummary");
+
+const publishButton =
+    document.getElementById("cqPublish");
+
+const clearButton =
+    document.getElementById("cqClear");
+
+const loading =
+    document.getElementById("cqLoading");
+
+const status =
+    document.getElementById("cqStatus");
+
+const published =
+    document.getElementById("cqPublished");
+
+const shareLink =
+    document.getElementById("cqShareLink");
+
+const copyButton =
+    document.getElementById("cqCopy");
+
+const openQuiz =
+    document.getElementById("cqOpenQuiz");
+
+const dashboard =
+    document.getElementById("cqDashboard");
+
+const newQuiz =
+    document.getElementById("cqNewQuiz");
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function showStatus(message, type) {
+
+    status.textContent = message;
+
+    status.className =
+        "cq-status show " + type;
+
+}
+
+
+function hideStatus() {
+
+    status.textContent = "";
+
+    status.className =
+        "cq-status";
+
+}
+
+
+/* =========================================================
+   TIME
+========================================================= */
+
+function getTimeLimit() {
+
+    let minutes =
+        Number(minutesInput.value) || 0;
+
+    let seconds =
+        Number(secondsInput.value) || 0;
+
+
+    minutes =
+        Math.max(0, Math.floor(minutes));
+
+    seconds =
+        Math.max(0, Math.min(59, Math.floor(seconds)));
+
+
+    return (minutes * 60) + seconds;
+
+}
+
+
+function formatTime(totalSeconds) {
+
+    const minutes =
+        Math.floor(totalSeconds / 60);
+
+    const seconds =
+        totalSeconds % 60;
+
+
+    return (
+        String(minutes).padStart(2, "0")
+        +
+        ":"
+        +
+        String(seconds).padStart(2, "0")
+    );
+
+}
+
+
+function updateTimePreview() {
+
+    timerSummary.textContent =
+        formatTime(getTimeLimit());
+
+}
+
+
+minutesInput.addEventListener(
+    "input",
+    updateTimePreview
+);
+
+secondsInput.addEventListener(
+    "input",
+    updateTimePreview
+);
+
+
+/* =========================================================
+   IMPORTANT:
+   YOUR SERVER EXPECTS 0-BASED CORRECT ANSWERS.
+
+   0 = first option
+   1 = second option
+   2 = third option
+   3 = fourth option
+========================================================= */
+
+function normalizeQuestions(questions) {
+
+    if (!Array.isArray(questions)) {
+
+        throw new Error(
+            "questions must be an array."
+        );
+
+    }
+
+
+    if (questions.length === 0) {
+
+        throw new Error(
+            "The JSON contains no questions."
+        );
+
+    }
+
+
+    return questions.map(
+        (q, index) => {
+
+            if (
+                !q.question ||
+                typeof q.question !== "string"
+            ) {
+
+                throw new Error(
+                    `Question ${index + 1} has no question text.`
+                );
+
+            }
+
+
+            if (
+                !Array.isArray(q.options) ||
+                q.options.length < 2
+            ) {
+
+                throw new Error(
+                    `Question ${index + 1} must have at least 2 options.`
+                );
+
+            }
+
+
+            if (
+                q.correctAnswer === undefined ||
+                q.correctAnswer === null
+            ) {
+
+                throw new Error(
+                    `Question ${index + 1} has no correct answer.`
+                );
+
+            }
+
+
+            let answer =
+                Number(q.correctAnswer);
+
+
+            if (!Number.isInteger(answer)) {
+
+                throw new Error(
+                    `Question ${index + 1} has an invalid correct answer.`
+                );
+
+            }
+
+
+            /*
+               Accept both formats during IMPORT,
+               but convert everything to the single
+               0-based format required by server.js.
+
+               If the JSON contains 0 anywhere, we
+               treat it as already 0-based.
+
+               Otherwise, if all answers are between
+               1 and option-count, we treat them as
+               1-based and subtract 1.
+            */
+
+            const allAnswers =
+                questions.map(
+                    item => Number(item.correctAnswer)
+                );
+
+
+            const containsZero =
+                allAnswers.includes(0);
+
+
+            if (!containsZero) {
+
+                const looksOneBased =
+                    allAnswers.every(
+                        (value, i) =>
+                            Number.isInteger(value) &&
+                            value >= 1 &&
+                            value <= questions[i].options.length
+                    );
+
+
+                if (looksOneBased) {
+
+                    answer = answer - 1;
+
+                }
+
+            }
+
+
+            if (
+                answer < 0 ||
+                answer >= q.options.length
+            ) {
+
+                throw new Error(
+                    `Question ${index + 1} has an invalid correct answer.`
+                );
+
+            }
+
+
+            return {
+
+                id:
+                    q.id !== undefined
+                        ? q.id
+                        : index + 1,
+
+                question:
+                    q.question,
+
+                options:
+                    q.options,
+
+                correctAnswer:
+                    answer
+
+            };
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   IMPORT JSON
+========================================================= */
+
+fileInput.addEventListener(
+    "change",
+    function () {
+
+        const file =
+            fileInput.files[0];
+
+
+        if (!file) {
+            return;
+        }
+
+
+        fileName.style.display =
+            "block";
+
+        fileName.textContent =
+            "📄 " + file.name;
+
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload =
+            function (event) {
+
+                try {
+
+                    const data =
+                        JSON.parse(
+                            event.target.result
+                        );
+
+
+                    const normalizedQuestions =
+                        normalizeQuestions(
+                            data.questions
+                        );
+
+
+                    quizData = {
+
+                        title:
+                            data.title || "",
+
+                        description:
+                            data.description || "",
+
+                        timeLimit:
+                            Number(data.timeLimit) || 600,
+
+                        questions:
+                            normalizedQuestions
+
+                    };
+
+
+                    /*
+                       Fill title and description
+                       only if currently empty.
+                    */
+
+                    if (
+                        !titleInput.value.trim()
+                        &&
+                        quizData.title
+                    ) {
+
+                        titleInput.value =
+                            quizData.title;
+
+                    }
+
+
+                    if (
+                        !descriptionInput.value.trim()
+                        &&
+                        quizData.description
+                    ) {
+
+                        descriptionInput.value =
+                            quizData.description;
+
+                    }
+
+
+                    /*
+                       Imported time is in seconds.
+                    */
+
+                    if (
+                        quizData.timeLimit > 0
+                    ) {
+
+                        minutesInput.value =
+                            Math.floor(
+                                quizData.timeLimit / 60
+                            );
+
+                        secondsInput.value =
+                            quizData.timeLimit % 60;
+
+                    }
+
+
+                    updateTimePreview();
+
+                    renderPreview();
+
+
+                    showStatus(
+                        "Questions imported successfully.",
+                        "success"
+                    );
+
+
+                    preview.scrollIntoView({
+                        behavior: "smooth"
+                    });
+
+                }
+
+                catch (error) {
+
+                    quizData = null;
+
+                    preview.classList.remove(
+                        "show"
+                    );
+
+                    showStatus(
+                        error.message,
+                        "error"
+                    );
+
+                }
+
+            };
+
+
+        reader.readAsText(file);
+
+    }
+);
+
+
+/* =========================================================
+   RENDER PREVIEW
+========================================================= */
+
+function renderPreview() {
+
+    if (!quizData) {
+        return;
+    }
+
+
+    questionCount.textContent =
+        quizData.questions.length;
+
+
+    titleSummary.textContent =
+        titleInput.value.trim()
+        ||
+        quizData.title
+        ||
+        "Untitled";
+
+
+    updateTimePreview();
+
+
+    questionsContainer.innerHTML =
+        "";
+
+
+    quizData.questions.forEach(
+        (q, index) => {
+
+            const questionBox =
+                document.createElement("div");
+
+            questionBox.className =
+                "cq-question";
+
+
+            const number =
+                document.createElement("div");
+
+            number.className =
+                "cq-question-number";
+
+            number.textContent =
+                `Question ${index + 1}`;
+
+            questionBox.appendChild(
+                number
+            );
+
+
+            const questionText =
+                document.createElement("div");
+
+            questionText.className =
+                "cq-question-text";
+
+            questionText.textContent =
+                q.question;
+
+            questionBox.appendChild(
+                questionText
+            );
+
+
+            q.options.forEach(
+                (option, optionIndex) => {
+
+                    const optionElement =
+                        document.createElement("div");
+
+                    optionElement.className =
+                        "cq-option";
+
+
+                    /*
+                       EXACTLY ONE correct answer.
+
+                       The server uses 0-based indexing.
+                    */
+
+                    if (
+                        optionIndex ===
+                        Number(q.correctAnswer)
+                    ) {
+
+                        optionElement.classList.add(
+                            "correct"
+                        );
+
+                        optionElement.textContent =
+                            "✓ " + option;
+
+                    }
+                    else {
+
+                        optionElement.textContent =
+                            option;
+
+                    }
+
+
+                    questionBox.appendChild(
+                        optionElement
+                    );
+
+                }
+            );
+
+
+            questionsContainer.appendChild(
+                questionBox
+            );
+
+        }
+    );
+
+
+    preview.classList.add(
+        "show"
+    );
+
+}
+
+
+/* =========================================================
+   TITLE PREVIEW
+========================================================= */
+
+titleInput.addEventListener(
+    "input",
+    function () {
+
+        if (quizData) {
+
+            titleSummary.textContent =
+                titleInput.value.trim()
+                ||
+                quizData.title
+                ||
+                "Untitled";
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   PUBLISH
+========================================================= */
+
+publishButton.addEventListener(
+    "click",
+    async function () {
+
+        hideStatus();
+
+
+        if (!quizData) {
+
+            showStatus(
+                "Please import a JSON file first.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const title =
+            titleInput.value.trim()
+            ||
+            quizData.title
+            ||
+            "Untitled Quiz";
+
+
+        const description =
+            descriptionInput.value.trim()
+            ||
+            quizData.description
+            ||
+            "";
+
+
+        const timeLimit =
+            getTimeLimit();
+
+
+        if (timeLimit < 30) {
+
+            showStatus(
+                "The timer must be at least 30 seconds.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        /*
+           FINAL DATA SENT TO YOUR SERVER.
+
+           server.js expects:
+
+           {
+               title,
+               description,
+               questions,
+               timeLimit
+           }
+        */
+
+        const payload = {
+
+            title:
+
+                title,
+
+            description:
+
+                description,
+
+            questions:
+
+                quizData.questions,
+
+            timeLimit:
+
+                timeLimit
+
+        };
+
+
+        publishButton.disabled =
+            true;
+
+        loading.classList.add(
+            "show"
+        );
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/quizzes",
+                    {
+
+                        method:
+                            "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(
+                                payload
+                            )
+
+                    }
+                );
+
+
+            const result =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    result.error
+                    ||
+                    "Failed to publish quiz."
+                );
+
+            }
+
+
+            /*
+               IMPORTANT:
+
+               Your server returns:
+
+               result.shareCode
+
+               NOT result.code
+            */
+
+            if (!result.shareCode) {
+
+                console.error(
+                    "Server response:",
+                    result
+                );
+
+                throw new Error(
+                    "The server did not return a share code."
+                );
+
+            }
+
+
+            publishedShareCode =
+                result.shareCode;
+
+
+            /*
+               Generate the actual quiz URL.
+            */
+
+            const quizUrl =
+                new URL(
+                    "quiz.html",
+                    window.location.href
+                );
+
+
+            quizUrl.searchParams.set(
+                "code",
+                publishedShareCode
+            );
+
+
+            const finalQuizUrl =
+                quizUrl.href;
+
+
+            /*
+               Generate dashboard URL.
+            */
+
+            const dashboardUrl =
+                new URL(
+                    "dashboard.html",
+                    window.location.href
+                );
+
+
+            dashboardUrl.searchParams.set(
+                "code",
+                publishedShareCode
+            );
+
+
+            const finalDashboardUrl =
+                dashboardUrl.href;
+
+
+            /*
+               CLICKABLE LINK
+            */
+
+            shareLink.innerHTML =
+                "";
+
+
+            const link =
+                document.createElement("a");
+
+
+            link.href =
+                finalQuizUrl;
+
+            link.target =
+                "_blank";
+
+            link.rel =
+                "noopener noreferrer";
+
+            link.textContent =
+                finalQuizUrl;
+
+
+            shareLink.appendChild(
+                link
+            );
+
+
+            openQuiz.href =
+                finalQuizUrl;
+
+
+            dashboard.href =
+                finalDashboardUrl;
+
+
+            published.classList.add(
+                "show"
+            );
+
+
+            showStatus(
+                "Quiz published successfully! 🎉",
+                "success"
+            );
+
+
+            published.scrollIntoView({
+                behavior: "smooth"
+            });
+
+        }
+
+        catch (error) {
+
+            console.error(
+                error
+            );
+
+
+            showStatus(
+                error.message,
+                "error"
+            );
+
+        }
+
+        finally {
+
+            publishButton.disabled =
+                false;
+
+            loading.classList.remove(
+                "show"
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   COPY LINK
+========================================================= */
+
+copyButton.addEventListener(
+    "click",
+    async function () {
+
+        const link =
+            shareLink.querySelector("a");
+
+
+        if (!link) {
+            return;
+        }
+
+
+        try {
+
+            await navigator.clipboard.writeText(
+                link.href
+            );
+
+
+            copyButton.textContent =
+                "✅ Copied!";
+
+
+            setTimeout(
+                function () {
+
+                    copyButton.textContent =
+                        "📋 Copy";
+
+                },
+                2000
+            );
+
+        }
+
+        catch {
+
+            /*
+               Fallback.
+            */
+
+            const textArea =
+                document.createElement(
+                    "textarea"
+                );
+
+
+            textArea.value =
+                link.href;
+
+
+            document.body.appendChild(
+                textArea
+            );
+
+
+            textArea.select();
+
+
+            document.execCommand(
+                "copy"
+            );
+
+
+            textArea.remove();
+
+
+            copyButton.textContent =
+                "✅ Copied!";
+
+
+            setTimeout(
+                function () {
+
+                    copyButton.textContent =
+                        "📋 Copy";
+
+                },
+                2000
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   CLEAR
+========================================================= */
+
+clearButton.addEventListener(
+    "click",
+    function () {
+
+        resetCreatePage();
+
+    }
+);
+
+
+/* =========================================================
+   NEW QUIZ
+========================================================= */
+
+newQuiz.addEventListener(
+    "click",
+    function () {
+
+        resetCreatePage();
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    }
+);
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+function resetCreatePage() {
+
+    quizData = null;
+
+    publishedShareCode = null;
+
+
+    fileInput.value =
+        "";
+
+    fileName.textContent =
+        "";
+
+    fileName.style.display =
+        "none";
+
+
+    titleInput.value =
+        "";
+
+    descriptionInput.value =
+        "";
+
+    minutesInput.value =
+        "30";
+
+    secondsInput.value =
+        "0";
+
+
+    questionsContainer.innerHTML =
+        "";
+
+
+    preview.classList.remove(
+        "show"
+    );
+
+
+    published.classList.remove(
+        "show"
+    );
+
+
+    shareLink.innerHTML =
+        "";
+
+
+    openQuiz.href =
+        "#";
+
+    dashboard.href =
+        "#";
+
+
+    updateTimePreview();
+
+    hideStatus();
+
+}
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+updateTimePreview();
+
+</script>
+
+</body>
+</html>

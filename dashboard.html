@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Quiz Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+<body>
+
+<header class="navbar">
+
+    <h2>
+        📊 Dashboard
+    </h2>
+
+    <a href="create.html">
+        New Quiz
+    </a>
+
+</header>
+
+
+<main class="container">
+
+    <div id="dashboard"></div>
+
+</main>
+
+
+<script>
+
+const code =
+    new URLSearchParams(
+        location.search
+    ).get("code");
+
+
+async function loadDashboard() {
+
+    const response =
+        await fetch(
+            `/api/quizzes/${code}/dashboard`
+        );
+
+
+    const data =
+        await response.json();
+
+
+    if (!response.ok) {
+
+        document
+            .getElementById(
+                "dashboard"
+            )
+            .innerHTML = `
+
+                <div class="result-box">
+
+                    <h2>
+                        ❌ Quiz not found
+                    </h2>
+
+                </div>
+
+            `;
+
+        return;
+
+    }
+
+
+    const stats =
+        data.statistics;
+
+
+    document
+        .getElementById(
+            "dashboard"
+        )
+        .innerHTML = `
+
+            <div class="dashboard-header">
+
+                <h1>
+                    ${escapeHTML(
+                        data.quiz.title
+                    )}
+                </h1>
+
+
+                <p>
+                    ${escapeHTML(
+                        data.quiz.description ||
+                        ""
+                    )}
+                </p>
+
+
+                <div class="share-section">
+
+                    <strong>
+                        🔗 Share Link
+                    </strong>
+
+
+                    <input
+                        id="shareLink"
+                        value="
+                            ${location.origin}
+                            /quiz.html?code=${code}
+                        "
+                        readonly
+                    >
+
+
+                    <button
+                        onclick="copyShareLink()"
+                    >
+                        📋 Copy Link
+                    </button>
+
+                </div>
+
+
+                <div class="dashboard-actions">
+
+                    <a
+                        href="/api/quizzes/${code}/export"
+                    >
+
+                        📥 Export CSV
+
+                    </a>
+
+
+                    <button
+                        class="danger"
+                        onclick="deleteQuiz()"
+                    >
+
+                        🗑️ Delete Quiz
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- STATISTICS -->
+
+            <h2>
+                📈 Statistics
+            </h2>
+
+
+            <div class="stats">
+
+                <div class="stat">
+
+                    <span>
+                        Attempts
+                    </span>
+
+                    <strong>
+                        ${stats.attempts || 0}
+                    </strong>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <span>
+                        Average Accuracy
+                    </span>
+
+                    <strong>
+                        ${Number(
+                            stats.average_accuracy ||
+                            0
+                        ).toFixed(1)}%
+                    </strong>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <span>
+                        Average Time
+                    </span>
+
+                    <strong>
+                        ${formatTime(
+                            Math.round(
+                                stats.average_time ||
+                                0
+                            )
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <span>
+                        Highest Score
+                    </span>
+
+                    <strong>
+                        ${stats.highest_score || 0}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- PARTICIPANTS -->
+
+            <h2>
+                👥 Participant Results
+            </h2>
+
+
+            <div id="attempts">
+
+                ${renderAttempts(
+                    data.attempts
+                )}
+
+            </div>
+
+        `;
+
+}
+
+
+/* =====================================================
+   ATTEMPTS
+===================================================== */
+
+function renderAttempts(
+    attempts
+) {
+
+    if (
+        attempts.length === 0
+    ) {
+
+        return `
+
+            <div class="card">
+
+                <p>
+                    No one has attempted
+                    this quiz yet.
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+
+    return attempts.map(
+        (attempt, index) => `
+
+            <div class="attempt">
+
+                <div class="attempt-top">
+
+                    <h3>
+
+                        ${index + 1}.
+                        ${escapeHTML(
+                            attempt.participant_name
+                        )}
+
+                    </h3>
+
+                    <span>
+
+                        ${new Date(
+                            attempt.submitted_at
+                        ).toLocaleString()}
+
+                    </span>
+
+                </div>
+
+
+                <div class="attempt-grid">
+
+                    <div>
+
+                        <small>
+                            Score
+                        </small>
+
+                        <strong>
+                            ${attempt.score}
+                            /
+                            ${attempt.total}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            Accuracy
+                        </small>
+
+                        <strong>
+                            ${attempt.accuracy}%
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <small>
+                            Time Taken
+                        </small>
+
+                        <strong>
+                            ${formatTime(
+                                attempt.time_taken
+                            )}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="feedback">
+
+                    <strong>
+                        💬 Feedback
+                    </strong>
+
+
+                    <p>
+
+                        ${
+                            attempt.feedback
+                            ? escapeHTML(
+                                attempt.feedback
+                            )
+                            : "No feedback provided."
+                        }
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        `
+    ).join("");
+
+}
+
+
+/* =====================================================
+   COPY
+===================================================== */
+
+function copyShareLink() {
+
+    const input =
+        document.getElementById(
+            "shareLink"
+        );
+
+
+    navigator.clipboard.writeText(
+        input.value.trim()
+    );
+
+
+    alert(
+        "Share link copied!"
+    );
+
+}
+
+
+/* =====================================================
+   DELETE
+===================================================== */
+
+async function deleteQuiz() {
+
+    const confirmed =
+        confirm(
+            "Delete this quiz and all its responses?"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    const response =
+        await fetch(
+            `/api/quizzes/${code}`,
+            {
+                method: "DELETE"
+            }
+        );
+
+
+    if (response.ok) {
+
+        alert(
+            "Quiz deleted."
+        );
+
+
+        location.href =
+            "create.html";
+
+    }
+
+}
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function formatTime(seconds) {
+
+    const minutes =
+        Math.floor(
+            seconds / 60
+        );
+
+
+    const remaining =
+        seconds % 60;
+
+
+    return `${minutes}m ${String(
+        remaining
+    ).padStart(2, "0")}s`;
+
+}
+
+
+function escapeHTML(text) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+    div.textContent =
+        text;
+
+    return div.innerHTML;
+
+}
+
+
+loadDashboard();
+
+</script>
+
+</body>
+
+</html>

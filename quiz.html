@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Quiz</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+<body>
+
+<!-- TIMER -->
+
+<div
+    id="timerBar"
+    class="timer-bar"
+>
+
+    <div class="timer-inner">
+
+        <span>
+            ⏱️ Time Remaining
+        </span>
+
+        <strong id="timer">
+            00:00
+        </strong>
+
+    </div>
+
+</div>
+
+
+<main class="container quiz-container">
+
+    <div id="quiz"></div>
+
+</main>
+
+
+<script>
+
+const code =
+    new URLSearchParams(
+        location.search
+    ).get("code");
+
+
+let quiz;
+
+let startTime;
+
+let timerInterval;
+
+let submitted = false;
+
+
+/* =====================================================
+   LOAD
+===================================================== */
+
+async function loadQuiz() {
+
+    if (!code) {
+
+        showError(
+            "Invalid quiz link."
+        );
+
+        return;
+
+    }
+
+
+    const response =
+        await fetch(
+            `/api/quizzes/${code}`
+        );
+
+
+    if (!response.ok) {
+
+        showError(
+            "Quiz not found."
+        );
+
+        return;
+
+    }
+
+
+    quiz =
+        await response.json();
+
+
+    renderQuiz();
+
+
+    startTime =
+        Date.now();
+
+
+    startTimer();
+
+}
+
+
+/* =====================================================
+   RENDER
+===================================================== */
+
+function renderQuiz() {
+
+    const container =
+        document.getElementById(
+            "quiz"
+        );
+
+
+    let html = `
+
+        <div class="quiz-header">
+
+            <h1>
+                ${escapeHTML(
+                    quiz.title
+                )}
+            </h1>
+
+            <p>
+                ${escapeHTML(
+                    quiz.description || ""
+                )}
+            </p>
+
+            <p class="muted">
+
+                ${quiz.questions.length}
+                Questions
+
+            </p>
+
+        </div>
+
+
+        <input
+            id="participant"
+            class="name-input"
+            placeholder="Enter your name"
+            autocomplete="name"
+        >
+
+    `;
+
+
+    quiz.questions.forEach(
+        (q, index) => {
+
+            html += `
+
+                <div
+                    class="quiz-question"
+                    data-question="${q.id}"
+                >
+
+                    <div class="question-number">
+
+                        Question
+                        ${index + 1}
+                        /
+                        ${quiz.questions.length}
+
+                    </div>
+
+
+                    <h3>
+
+                        ${escapeHTML(
+                            q.question
+                        )}
+
+                    </h3>
+
+
+                    <div class="options">
+
+                        ${q.options.map(
+                            (option, i) => `
+
+                            <label
+                                class="option"
+                            >
+
+                                <input
+                                    type="radio"
+                                    name="q-${q.id}"
+                                    value="${i}"
+                                    onchange="
+                                        questionAnswered(
+                                            ${q.id}
+                                        )
+                                    "
+                                >
+
+                                <span>
+                                    ${escapeHTML(
+                                        String(option)
+                                    )}
+                                </span>
+
+                            </label>
+
+                        `
+                        ).join("")}
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+    );
+
+
+    html += `
+
+        <div class="feedback-box">
+
+            <label>
+                💬 Feedback
+            </label>
+
+            <textarea
+                id="feedback"
+                placeholder="
+                    Any feedback about
+                    this quiz?
+                "
+            ></textarea>
+
+        </div>
+
+
+        <button
+            id="submitButton"
+            class="success full-button"
+            onclick="submitQuiz(false)"
+        >
+
+            Submit Quiz
+
+        </button>
+
+    `;
+
+
+    container.innerHTML =
+        html;
+
+}
+
+
+/* =====================================================
+   QUESTION TIMING
+===================================================== */
+
+const questionStartTimes = {};
+
+const questionTimes = {};
+
+
+function questionAnswered(
+    questionId
+) {
+
+    if (
+        questionStartTimes[
+            questionId
+        ] === undefined
+    ) {
+
+        questionStartTimes[
+            questionId
+        ] = Date.now();
+
+    }
+
+}
+
+
+/*
+   We calculate approximate
+   per-question time when submitting.
+*/
+
+function calculateQuestionTimes() {
+
+    const result = {};
+
+
+    quiz.questions.forEach(q => {
+
+        if (
+            questionStartTimes[
+                q.id
+            ] !== undefined
+        ) {
+
+            result[q.id] =
+                Math.floor(
+                    (
+                        Date.now() -
+                        questionStartTimes[q.id]
+                    ) / 1000
+                );
+
+        } else {
+
+            result[q.id] = 0;
+
+        }
+
+    });
+
+
+    return result;
+
+}
+
+
+/* =====================================================
+   TIMER
+===================================================== */
+
+function startTimer() {
+
+    let remaining =
+        quiz.timeLimit;
+
+
+    updateTimer(
+        remaining
+    );
+
+
+    timerInterval =
+        setInterval(() => {
+
+            remaining--;
+
+            updateTimer(
+                remaining
+            );
+
+
+            if (
+                remaining <= 0
+            ) {
+
+                clearInterval(
+                    timerInterval
+                );
+
+                submitQuiz(true);
+
+            }
+
+        }, 1000);
+
+}
+
+
+function updateTimer(
+    seconds
+) {
+
+    seconds =
+        Math.max(
+            0,
+            seconds
+        );
+
+
+    const minutes =
+        Math.floor(
+            seconds / 60
+        );
+
+
+    const secs =
+        seconds % 60;
+
+
+    document
+        .getElementById(
+            "timer"
+        )
+        .textContent =
+            `${String(minutes)
+                .padStart(2, "0")}:${String(secs)
+                .padStart(2, "0")}`;
+
+
+    const bar =
+        document
+            .getElementById(
+                "timerBar"
+            );
+
+
+    if (
+        seconds <= 60
+    ) {
+
+        bar.classList.add(
+            "timer-warning"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   SUBMIT
+===================================================== */
+
+async function submitQuiz(
+    autoSubmit
+) {
+
+    if (submitted) {
+        return;
+    }
+
+
+    submitted = true;
+
+
+    clearInterval(
+        timerInterval
+    );
+
+
+    const answers = {};
+
+
+    quiz.questions.forEach(q => {
+
+        const selected =
+            document.querySelector(
+                `input[name="q-${q.id}"]:checked`
+            );
+
+
+        if (selected) {
+
+            answers[q.id] =
+                Number(
+                    selected.value
+                );
+
+        }
+
+    });
+
+
+    const timeTaken =
+        Math.min(
+
+            quiz.timeLimit,
+
+            Math.floor(
+                (
+                    Date.now() -
+                    startTime
+                ) / 1000
+            )
+
+        );
+
+
+    const participantName =
+        document
+            .getElementById(
+                "participant"
+            )
+            ?.value
+            .trim() ||
+        "Anonymous";
+
+
+    const feedback =
+        document
+            .getElementById(
+                "feedback"
+            )
+            ?.value ||
+        "";
+
+
+    const button =
+        document
+            .getElementById(
+                "submitButton"
+            );
+
+
+    button.disabled =
+        true;
+
+
+    button.textContent =
+        "Submitting...";
+
+
+    const response =
+        await fetch(
+            `/api/quizzes/${code}/submit`,
+            {
+
+                method: "POST",
+
+                headers: {
+
+                    "Content-Type":
+                        "application/json"
+
+                },
+
+                body: JSON.stringify({
+
+                    participantName,
+
+                    answers,
+
+                    questionTimes:
+                        calculateQuestionTimes(),
+
+                    timeTaken,
+
+                    feedback
+
+                })
+
+            }
+        );
+
+
+    const result =
+        await response.json();
+
+
+    if (!response.ok) {
+
+        submitted = false;
+
+        button.disabled =
+            false;
+
+        button.textContent =
+            "Submit Quiz";
+
+
+        alert(
+            result.error ||
+            "Submission failed."
+        );
+
+        return;
+
+    }
+
+
+    showResult(
+        result,
+        autoSubmit
+    );
+
+}
+
+
+/* =====================================================
+   RESULT
+===================================================== */
+
+function showResult(
+    result,
+    autoSubmit
+) {
+
+    document
+        .getElementById(
+            "timerBar"
+        )
+        .style.display =
+        "none";
+
+
+    document
+        .getElementById(
+            "quiz"
+        )
+        .innerHTML = `
+
+            <div class="result-box">
+
+                ${
+                    autoSubmit
+                    ? `
+                        <div class="time-up">
+                            ⏰ Time's up!
+                        </div>
+                    `
+                    : ""
+                }
+
+
+                <h1>
+                    🎉 Quiz Completed!
+                </h1>
+
+
+                <div class="score-circle">
+
+                    ${result.score}
+                    /
+                    ${result.total}
+
+                </div>
+
+
+                <h2>
+
+                    Accuracy:
+                    ${result.accuracy}%
+
+                </h2>
+
+
+                <p>
+
+                    ⏱️ Time Taken:
+
+                    <strong>
+                        ${formatTime(
+                            result.timeTaken
+                        )}
+                    </strong>
+
+                </p>
+
+
+                <button
+                    onclick="location.reload()"
+                >
+
+                    Try Again
+
+                </button>
+
+            </div>
+
+        `;
+
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+function showError(message) {
+
+    document
+        .getElementById(
+            "quiz"
+        )
+        .innerHTML = `
+
+            <div class="result-box">
+
+                <h2>
+                    ❌ ${message}
+                </h2>
+
+            </div>
+
+        `;
+
+}
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function formatTime(seconds) {
+
+    const minutes =
+        Math.floor(
+            seconds / 60
+        );
+
+
+    const remaining =
+        seconds % 60;
+
+
+    return `${minutes}m ${String(
+        remaining
+    ).padStart(2, "0")}s`;
+
+}
+
+
+function escapeHTML(text) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+    div.textContent =
+        text;
+
+    return div.innerHTML;
+
+}
+
+
+loadQuiz();
+
+</script>
+
+</body>
+
+</html>

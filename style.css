@@ -1,0 +1,1227 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+
+    margin: 0;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        #f4f6f9;
+
+    color:
+        #1f2937;
+
+    line-height:
+        1.5;
+
+}
+
+
+/* =====================================================
+   NAVBAR
+===================================================== */
+
+.navbar {
+
+    position:
+        sticky;
+
+    top:
+        0;
+
+    z-index:
+        1000;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    padding:
+        14px 5%;
+
+    background:
+        #111827;
+
+    color:
+        white;
+
+}
+
+
+.navbar h2 {
+
+    margin:
+        0;
+
+    font-size:
+        20px;
+
+}
+
+
+.navbar a {
+
+    color:
+        white;
+
+    text-decoration:
+        none;
+
+}
+
+
+/* =====================================================
+   CONTAINER
+===================================================== */
+
+.container {
+
+    width:
+        92%;
+
+    max-width:
+        900px;
+
+    margin:
+        25px auto;
+
+}
+
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.hero {
+
+    text-align:
+        center;
+
+    background:
+        white;
+
+    padding:
+        70px 20px;
+
+}
+
+
+.hero h1 {
+
+    font-size:
+        clamp(
+            32px,
+            8vw,
+            50px
+        );
+
+    margin:
+        0 0 15px;
+
+}
+
+
+.hero p {
+
+    color:
+        #6b7280;
+
+    font-size:
+        18px;
+
+}
+
+
+/* =====================================================
+   BUTTON
+===================================================== */
+
+button {
+
+    border:
+        none;
+
+    border-radius:
+        9px;
+
+    padding:
+        13px 18px;
+
+    min-height:
+        46px;
+
+    background:
+        #2563eb;
+
+    color:
+        white;
+
+    font-size:
+        16px;
+
+    cursor:
+        pointer;
+
+}
+
+
+button:hover {
+
+    opacity:
+        0.9;
+
+}
+
+
+button:disabled {
+
+    opacity:
+        0.6;
+
+}
+
+
+.success {
+
+    background:
+        #16a34a;
+
+}
+
+
+.danger {
+
+    background:
+        #dc2626;
+
+}
+
+
+.full-button {
+
+    width:
+        100%;
+
+}
+
+
+/* =====================================================
+   INPUTS
+===================================================== */
+
+input,
+textarea,
+select {
+
+    width:
+        100%;
+
+    padding:
+        13px;
+
+    margin:
+        7px 0 16px;
+
+    border:
+        1px solid #d1d5db;
+
+    border-radius:
+        9px;
+
+    background:
+        white;
+
+    font-size:
+        16px;
+
+    outline:
+        none;
+
+}
+
+
+input:focus,
+textarea:focus,
+select:focus {
+
+    border-color:
+        #2563eb;
+
+}
+
+
+textarea {
+
+    min-height:
+        100px;
+
+    resize:
+        vertical;
+
+}
+
+
+/* =====================================================
+   CARDS
+===================================================== */
+
+.card {
+
+    background:
+        white;
+
+    padding:
+        22px;
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 3px 15px
+        rgba(
+            0,
+            0,
+            0,
+            0.07
+        );
+
+    margin-bottom:
+        18px;
+
+}
+
+
+/* =====================================================
+   FEATURES
+===================================================== */
+
+.features {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            1fr
+        );
+
+    gap:
+        18px;
+
+    padding:
+        40px 5%;
+
+}
+
+
+/* =====================================================
+   UPLOAD
+===================================================== */
+
+.upload-box {
+
+    background:
+        white;
+
+    border:
+        2px dashed #9ca3af;
+
+    border-radius:
+        15px;
+
+    padding:
+        35px 20px;
+
+    text-align:
+        center;
+
+    margin:
+        20px 0;
+
+}
+
+
+.upload-icon {
+
+    font-size:
+        45px;
+
+}
+
+
+.upload-box input {
+
+    margin-top:
+        15px;
+
+}
+
+
+/* =====================================================
+   TIMER SETTINGS
+===================================================== */
+
+.timer-settings {
+
+    background:
+        #eef4ff;
+
+    padding:
+        20px;
+
+    border-radius:
+        12px;
+
+    margin:
+        20px 0;
+
+}
+
+
+.time-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        12px;
+
+}
+
+
+/* =====================================================
+   QUESTION EDITOR
+===================================================== */
+
+.question-editor {
+
+    background:
+        white;
+
+    padding:
+        20px;
+
+    margin:
+        16px 0;
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 2px 10px
+        rgba(
+            0,
+            0,
+            0,
+            0.05
+        );
+
+}
+
+
+.question-number {
+
+    display:
+        inline-block;
+
+    padding:
+        5px 10px;
+
+    border-radius:
+        20px;
+
+    background:
+        #eef4ff;
+
+    color:
+        #2563eb;
+
+    font-size:
+        13px;
+
+    font-weight:
+        bold;
+
+}
+
+
+.preview-option {
+
+    padding:
+        12px;
+
+    margin:
+        7px 0;
+
+    border-radius:
+        8px;
+
+    background:
+        #f3f4f6;
+
+}
+
+
+.preview-option.correct {
+
+    background:
+        #dcfce7;
+
+    color:
+        #166534;
+
+    font-weight:
+        bold;
+
+}
+
+
+/* =====================================================
+   QUIZ TIMER
+===================================================== */
+
+.timer-bar {
+
+    position:
+        sticky;
+
+    top:
+        0;
+
+    z-index:
+        999;
+
+    background:
+        #111827;
+
+    color:
+        white;
+
+}
+
+
+.timer-inner {
+
+    width:
+        92%;
+
+    max-width:
+        900px;
+
+    min-height:
+        62px;
+
+    margin:
+        auto;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+}
+
+
+.timer-bar strong {
+
+    font-size:
+        25px;
+
+    font-variant-numeric:
+        tabular-nums;
+
+}
+
+
+.timer-warning {
+
+    background:
+        #dc2626;
+
+}
+
+
+/* =====================================================
+   QUIZ
+===================================================== */
+
+.quiz-container {
+
+    max-width:
+        800px;
+
+}
+
+
+.quiz-header {
+
+    background:
+        white;
+
+    padding:
+        22px;
+
+    border-radius:
+        14px;
+
+    margin-bottom:
+        18px;
+
+}
+
+
+.quiz-header h1 {
+
+    margin-top:
+        0;
+
+}
+
+
+.quiz-question {
+
+    background:
+        white;
+
+    padding:
+        20px;
+
+    margin:
+        16px 0;
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 2px 10px
+        rgba(
+            0,
+            0,
+            0,
+            0.05
+        );
+
+}
+
+
+.option {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    padding:
+        14px;
+
+    margin:
+        9px 0;
+
+    border:
+        2px solid transparent;
+
+    border-radius:
+        10px;
+
+    background:
+        #f3f4f6;
+
+    cursor:
+        pointer;
+
+}
+
+
+.option:hover {
+
+    border-color:
+        #2563eb;
+
+}
+
+
+.option input {
+
+    width:
+        20px;
+
+    height:
+        20px;
+
+    margin:
+        0;
+
+    flex-shrink:
+        0;
+
+}
+
+
+.feedback-box {
+
+    background:
+        white;
+
+    padding:
+        20px;
+
+    border-radius:
+        14px;
+
+    margin:
+        20px 0;
+
+}
+
+
+/* =====================================================
+   RESULT
+===================================================== */
+
+.result-box {
+
+    background:
+        white;
+
+    padding:
+        30px 20px;
+
+    border-radius:
+        16px;
+
+    text-align:
+        center;
+
+    margin-top:
+        25px;
+
+    box-shadow:
+        0 4px 20px
+        rgba(
+            0,
+            0,
+            0,
+            0.08
+        );
+
+}
+
+
+.score-circle {
+
+    width:
+        120px;
+
+    height:
+        120px;
+
+    border-radius:
+        50%;
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    margin:
+        20px auto;
+
+    background:
+        #eef4ff;
+
+    color:
+        #2563eb;
+
+    font-size:
+        30px;
+
+    font-weight:
+        bold;
+
+}
+
+
+.time-up {
+
+    display:
+        inline-block;
+
+    padding:
+        8px 14px;
+
+    border-radius:
+        20px;
+
+    background:
+        #fee2e2;
+
+    color:
+        #b91c1c;
+
+}
+
+
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+.dashboard-header {
+
+    background:
+        white;
+
+    padding:
+        22px;
+
+    border-radius:
+        14px;
+
+}
+
+
+.share-section {
+
+    margin:
+        20px 0;
+
+}
+
+
+.dashboard-actions {
+
+    display:
+        flex;
+
+    gap:
+        10px;
+
+    flex-wrap:
+        wrap;
+
+    align-items:
+        center;
+
+}
+
+
+.dashboard-actions a {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-height:
+        46px;
+
+    padding:
+        0 16px;
+
+    border-radius:
+        9px;
+
+    background:
+        #2563eb;
+
+    color:
+        white;
+
+    text-decoration:
+        none;
+
+}
+
+
+/* =====================================================
+   STATISTICS
+===================================================== */
+
+.stats {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            1fr
+        );
+
+    gap:
+        14px;
+
+    margin:
+        20px 0;
+
+}
+
+
+.stat {
+
+    background:
+        white;
+
+    padding:
+        20px 10px;
+
+    border-radius:
+        12px;
+
+    text-align:
+        center;
+
+}
+
+
+.stat span {
+
+    display:
+        block;
+
+    color:
+        #6b7280;
+
+    font-size:
+        14px;
+
+}
+
+
+.stat strong {
+
+    display:
+        block;
+
+    margin-top:
+        5px;
+
+    font-size:
+        26px;
+
+}
+
+
+/* =====================================================
+   ATTEMPTS
+===================================================== */
+
+.attempt {
+
+    background:
+        white;
+
+    padding:
+        20px;
+
+    margin:
+        14px 0;
+
+    border-radius:
+        12px;
+
+    border-left:
+        4px solid #2563eb;
+
+}
+
+
+.attempt-top {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    gap:
+        10px;
+
+}
+
+
+.attempt-top span {
+
+    color:
+        #6b7280;
+
+    font-size:
+        13px;
+
+}
+
+
+.attempt-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            1fr
+        );
+
+    gap:
+        10px;
+
+    margin:
+        15px 0;
+
+}
+
+
+.attempt-grid div {
+
+    background:
+        #f3f4f6;
+
+    padding:
+        12px;
+
+    border-radius:
+        8px;
+
+}
+
+
+.attempt-grid small {
+
+    display:
+        block;
+
+    color:
+        #6b7280;
+
+}
+
+
+.attempt-grid strong {
+
+    font-size:
+        18px;
+
+}
+
+
+.feedback {
+
+    border-top:
+        1px solid #e5e7eb;
+
+    padding-top:
+        12px;
+
+}
+
+
+.feedback p {
+
+    color:
+        #4b5563;
+
+}
+
+
+.muted {
+
+    color:
+        #6b7280;
+
+}
+
+
+.hidden {
+
+    display:
+        none;
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (
+    max-width: 700px
+) {
+
+    .navbar {
+
+        padding:
+            12px 4%;
+
+    }
+
+
+    .navbar h2 {
+
+        font-size:
+            18px;
+
+    }
+
+
+    .hero {
+
+        padding:
+            55px 18px;
+
+    }
+
+
+    .container {
+
+        width:
+            94%;
+
+        margin:
+            18px auto;
+
+    }
+
+
+    .features {
+
+        grid-template-columns:
+            1fr;
+
+        padding:
+            25px 5%;
+
+    }
+
+
+    .time-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .stats {
+
+        grid-template-columns:
+            1fr 1fr;
+
+    }
+
+
+    .stat strong {
+
+        font-size:
+            21px;
+
+    }
+
+
+    .attempt-top {
+
+        flex-direction:
+            column;
+
+    }
+
+
+    .attempt-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .dashboard-actions {
+
+        flex-direction:
+            column;
+
+        align-items:
+            stretch;
+
+    }
+
+
+    .dashboard-actions a,
+    .dashboard-actions button {
+
+        width:
+            100%;
+
+    }
+
+
+    .timer-inner {
+
+        width:
+            94%;
+
+        min-height:
+            58px;
+
+    }
+
+
+    .timer-bar strong {
+
+        font-size:
+            23px;
+
+    }
+
+
+    .option {
+
+        min-height:
+            52px;
+
+        padding:
+            14px 12px;
+
+    }
+
+
+    .quiz-question {
+
+        padding:
+            15px;
+
+    }
+
+}
