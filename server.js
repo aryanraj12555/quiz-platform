@@ -5,51 +5,23 @@ const path = require("path");
 
 const app = express();
 
-/*
-=========================================================
-SERVER PORT
-=========================================================
-
-Local computer:
-    PORT = 3000
-
-Render:
-    PORT is automatically provided by Render.
-*/
 const PORT = process.env.PORT || 3000;
-
-
-/*
-=========================================================
-DATABASE
-=========================================================
-*/
 
 const dbPath =
     process.env.DATABASE_PATH ||
     path.join(__dirname, "quiz.db");
 
-const db =
-    new Database(dbPath);
+const db = new Database(dbPath);
 
+app.use(express.json({ limit: "10mb" }));
 
 /*
 =========================================================
-MIDDLEWARE
+SERVE WEBSITE FILES
 =========================================================
 */
 
-app.use(
-    express.json({
-        limit: "10mb"
-    })
-);
-
-app.use(
-    express.static(
-        path.join(__dirname, "public")
-    )
-);
+app.use(express.static(__dirname));
 
 
 /*
@@ -60,49 +32,30 @@ DATABASE TABLES
 
 db.exec(`
     CREATE TABLE IF NOT EXISTS quizzes (
-
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-
         share_code TEXT UNIQUE NOT NULL,
-
         title TEXT NOT NULL,
-
         description TEXT DEFAULT '',
-
         questions TEXT NOT NULL,
-
         time_limit INTEGER NOT NULL,
-
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
 
-
     CREATE TABLE IF NOT EXISTS attempts (
-
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-
         quiz_id INTEGER NOT NULL,
-
         participant_name TEXT DEFAULT 'Anonymous',
-
         answers TEXT NOT NULL,
-
         question_times TEXT NOT NULL,
-
         score INTEGER NOT NULL,
-
         total INTEGER NOT NULL,
-
         accuracy REAL NOT NULL,
-
         time_taken INTEGER NOT NULL,
-
         feedback TEXT DEFAULT '',
-
         submitted_at TEXT DEFAULT CURRENT_TIMESTAMP,
 
         FOREIGN KEY (quiz_id)
-            REFERENCES quizzes(id)
+        REFERENCES quizzes(id)
     );
 `);
 
@@ -114,18 +67,15 @@ HELPERS
 */
 
 function generateShareCode() {
-
     return crypto
         .randomBytes(6)
         .toString("base64url");
-
 }
 
 
 function formatSeconds(seconds) {
 
-    seconds =
-        Number(seconds) || 0;
+    seconds = Number(seconds) || 0;
 
     const minutes =
         Math.floor(seconds / 60);
@@ -133,36 +83,40 @@ function formatSeconds(seconds) {
     const remaining =
         seconds % 60;
 
-    return (
-        `${minutes}m ` +
-        `${String(remaining).padStart(2, "0")}s`
+    return `${minutes}m ${String(remaining).padStart(2, "0")}s`;
+}
+
+
+/*
+=========================================================
+HOME PAGE
+=========================================================
+*/
+
+app.get("/", (req, res) => {
+
+    res.sendFile(
+        path.join(__dirname, "index.html")
     );
 
-}
+});
 
 
 /*
 =========================================================
 HEALTH CHECK
 =========================================================
-
-Useful for Render and for testing whether the
-server is alive.
-=========================================================
 */
 
-app.get(
-    "/api/health",
-    (req, res) => {
+app.get("/api/health", (req, res) => {
 
-        res.json({
-            success: true,
-            message: "Quiz server is running.",
-            time: new Date().toISOString()
-        });
+    res.json({
+        success: true,
+        message: "Quiz server is running.",
+        time: new Date().toISOString()
+    });
 
-    }
-);
+});
 
 
 /*
@@ -171,349 +125,270 @@ CREATE QUIZ
 =========================================================
 */
 
-app.post(
-    "/api/quizzes",
-    (req, res) => {
+app.post("/api/quizzes", (req, res) => {
 
-        try {
+    try {
 
-            const {
-                title,
-                description,
-                questions,
-                timeLimit
-            } = req.body;
+        const {
+            title,
+            description,
+            questions,
+            timeLimit
+        } = req.body;
 
 
-            /*
-            ---------- VALIDATION ----------
-            */
+        if (
+            !title ||
+            typeof title !== "string" ||
+            !title.trim()
+        ) {
+
+            return res.status(400).json({
+                error: "Quiz title is required."
+            });
+
+        }
+
+
+        if (
+            !Array.isArray(questions) ||
+            questions.length === 0
+        ) {
+
+            return res.status(400).json({
+                error: "No questions were provided."
+            });
+
+        }
+
+
+        if (questions.length > 200) {
+
+            return res.status(400).json({
+                error: "Maximum 200 questions allowed."
+            });
+
+        }
+
+
+        for (
+            let i = 0;
+            i < questions.length;
+            i++
+        ) {
+
+            const q = questions[i];
+
 
             if (
-                !title ||
-                typeof title !== "string" ||
-                !title.trim()
+                !q ||
+                typeof q.question !== "string" ||
+                !q.question.trim() ||
+                !Array.isArray(q.options) ||
+                q.options.length < 2
             ) {
 
                 return res.status(400).json({
-
-                    error:
-                        "Quiz title is required."
-
+                    error: `Question ${i + 1} is invalid.`
                 });
 
             }
 
 
             if (
-                !Array.isArray(questions) ||
-                questions.length === 0
+                q.correctAnswer === undefined ||
+                q.correctAnswer === null ||
+                !Number.isInteger(
+                    Number(q.correctAnswer)
+                ) ||
+                Number(q.correctAnswer) < 0 ||
+                Number(q.correctAnswer) >= q.options.length
             ) {
 
                 return res.status(400).json({
-
                     error:
-                        "No questions were provided."
-
+                        `Question ${i + 1} has an invalid correct answer.`
                 });
 
             }
 
-
-            if (
-                questions.length > 200
-            ) {
-
-                return res.status(400).json({
-
-                    error:
-                        "Maximum 200 questions allowed."
-
-                });
-
-            }
+        }
 
 
-            /*
-            ---------- QUESTION VALIDATION ----------
-            */
-
-            for (
-                let i = 0;
-                i < questions.length;
-                i++
-            ) {
-
-                const q =
-                    questions[i];
-
-
-                if (
-                    !q ||
-                    typeof q.question !== "string" ||
-                    !q.question.trim() ||
-                    !Array.isArray(q.options) ||
-                    q.options.length < 2
-                ) {
-
-                    return res.status(400).json({
-
-                        error:
-                            `Question ${i + 1} is invalid.`
-
-                    });
-
-                }
-
-
-                /*
-                Correct answer is ZERO-BASED:
-
-                0 = first option
-                1 = second option
-                2 = third option
-                etc.
-                */
-
-                if (
-                    q.correctAnswer === undefined ||
-                    q.correctAnswer === null ||
-                    !Number.isInteger(
-                        Number(q.correctAnswer)
-                    ) ||
-                    Number(q.correctAnswer) < 0 ||
-                    Number(q.correctAnswer) >=
-                        q.options.length
-                ) {
-
-                    return res.status(400).json({
-
-                        error:
-                            `Question ${i + 1} has an invalid correct answer.`
-
-                    });
-
-                }
-
-            }
-
-
-            /*
-            ---------- TIMER ----------
-            */
-
-            const finalTimeLimit =
-                Math.max(
-                    30,
-                    Number(timeLimit) || 600
-                );
-
-
-            /*
-            ---------- UNIQUE SHARE CODE ----------
-            */
-
-            let shareCode;
-
-
-            do {
-
-                shareCode =
-                    generateShareCode();
-
-            } while (
-
-                db.prepare(`
-                    SELECT id
-                    FROM quizzes
-                    WHERE share_code = ?
-                `).get(shareCode)
-
+        const finalTimeLimit =
+            Math.max(
+                30,
+                Number(timeLimit) || 600
             );
 
 
-            /*
-            ---------- SAVE QUIZ ----------
-            */
-
-            const result =
-                db.prepare(`
-                    INSERT INTO quizzes
-                    (
-                        share_code,
-                        title,
-                        description,
-                        questions,
-                        time_limit
-                    )
-                    VALUES (?, ?, ?, ?, ?)
-                `).run(
-
-                    shareCode,
-
-                    title.trim(),
-
-                    description || "",
-
-                    JSON.stringify(
-                        questions
-                    ),
-
-                    finalTimeLimit
-
-                );
+        let shareCode;
 
 
-            /*
-            ---------- RESPONSE ----------
-            */
+        do {
 
-            res.json({
+            shareCode =
+                generateShareCode();
 
-                success: true,
+        } while (
 
-                quizId:
-                    result.lastInsertRowid,
+            db.prepare(`
+                SELECT id
+                FROM quizzes
+                WHERE share_code = ?
+            `).get(shareCode)
+
+        );
+
+
+        const result =
+            db.prepare(`
+                INSERT INTO quizzes
+                (
+                    share_code,
+                    title,
+                    description,
+                    questions,
+                    time_limit
+                )
+                VALUES (?, ?, ?, ?, ?)
+            `).run(
 
                 shareCode,
 
-                timeLimit:
-                    finalTimeLimit
+                title.trim(),
 
-            });
+                description || "",
 
-        }
+                JSON.stringify(questions),
 
-        catch (error) {
+                finalTimeLimit
 
-            console.error(
-                "CREATE QUIZ ERROR:",
-                error
             );
 
-            res.status(500).json({
 
-                error:
-                    "Failed to create quiz."
+        res.json({
 
-            });
+            success: true,
 
-        }
+            quizId:
+                result.lastInsertRowid,
+
+            shareCode,
+
+            timeLimit:
+                finalTimeLimit
+
+        });
 
     }
-);
+
+    catch (error) {
+
+        console.error(
+            "CREATE QUIZ ERROR:",
+            error
+        );
+
+        res.status(500).json({
+            error: "Failed to create quiz."
+        });
+
+    }
+
+});
 
 
 /*
 =========================================================
 GET QUIZ
 =========================================================
-
-The correct answers are deliberately removed before
-sending the quiz to the participant.
-=========================================================
 */
 
-app.get(
-    "/api/quizzes/:code",
-    (req, res) => {
+app.get("/api/quizzes/:code", (req, res) => {
 
-        try {
+    try {
 
-            const quiz =
-                db.prepare(`
-                    SELECT
-                        id,
-                        title,
-                        description,
-                        questions,
-                        time_limit
-                    FROM quizzes
-                    WHERE share_code = ?
-                `).get(
-                    req.params.code
-                );
-
-
-            if (!quiz) {
-
-                return res.status(404).json({
-
-                    error:
-                        "Quiz not found."
-
-                });
-
-            }
-
-
-            const questions =
-                JSON.parse(
-                    quiz.questions
-                );
-
-
-            /*
-            Remove correctAnswer before
-            sending questions to participants.
-            */
-
-            const safeQuestions =
-                questions.map(
-                    q => ({
-
-                        id:
-                            q.id,
-
-                        question:
-                            q.question,
-
-                        options:
-                            q.options
-
-                    })
-                );
-
-
-            res.json({
-
-                id:
-                    quiz.id,
-
-                title:
-                    quiz.title,
-
-                description:
-                    quiz.description,
-
-                timeLimit:
-                    quiz.time_limit,
-
-                questions:
-                    safeQuestions
-
-            });
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "GET QUIZ ERROR:",
-                error
+        const quiz =
+            db.prepare(`
+                SELECT
+                    id,
+                    title,
+                    description,
+                    questions,
+                    time_limit
+                FROM quizzes
+                WHERE share_code = ?
+            `).get(
+                req.params.code
             );
 
-            res.status(500).json({
 
-                error:
-                    "Could not load quiz."
+        if (!quiz) {
 
+            return res.status(404).json({
+                error: "Quiz not found."
             });
 
         }
 
+
+        const questions =
+            JSON.parse(
+                quiz.questions
+            );
+
+
+        const safeQuestions =
+            questions.map(q => ({
+
+                id:
+                    q.id,
+
+                question:
+                    q.question,
+
+                options:
+                    q.options
+
+            }));
+
+
+        res.json({
+
+            id:
+                quiz.id,
+
+            title:
+                quiz.title,
+
+            description:
+                quiz.description,
+
+            timeLimit:
+                quiz.time_limit,
+
+            questions:
+                safeQuestions
+
+        });
+
     }
-);
+
+    catch (error) {
+
+        console.error(
+            "GET QUIZ ERROR:",
+            error
+        );
+
+        res.status(500).json({
+            error: "Could not load quiz."
+        });
+
+    }
+
+});
 
 
 /*
@@ -541,10 +416,7 @@ app.post(
             if (!quiz) {
 
                 return res.status(404).json({
-
-                    error:
-                        "Quiz not found."
-
+                    error: "Quiz not found."
                 });
 
             }
@@ -565,41 +437,31 @@ app.post(
             } = req.body;
 
 
-            /*
-            ---------- CALCULATE SCORE ----------
-            */
-
             let score = 0;
 
 
-            questions.forEach(
-                q => {
+            questions.forEach(q => {
 
-                    const userAnswer =
-                        answers?.[q.id];
+                const userAnswer =
+                    answers?.[q.id];
 
 
-                    if (
-                        userAnswer !== undefined &&
-                        Number(userAnswer) ===
-                            Number(q.correctAnswer)
-                    ) {
+                if (
+                    userAnswer !== undefined &&
+                    Number(userAnswer) ===
+                    Number(q.correctAnswer)
+                ) {
 
-                        score++;
-
-                    }
+                    score++;
 
                 }
-            );
+
+            });
 
 
             const total =
                 questions.length;
 
-
-            /*
-            ---------- ACCURACY ----------
-            */
 
             const accuracy =
                 Number(
@@ -610,26 +472,15 @@ app.post(
                 );
 
 
-            /*
-            ---------- SAFE TIME ----------
-            */
-
             const safeTime =
                 Math.min(
-
                     quiz.time_limit,
-
                     Math.max(
                         0,
                         Number(timeTaken) || 0
                     )
-
                 );
 
-
-            /*
-            ---------- SAVE ATTEMPT ----------
-            */
 
             const result =
                 db.prepare(`
@@ -674,10 +525,6 @@ app.post(
                 );
 
 
-            /*
-            ---------- RESPONSE ----------
-            */
-
             res.json({
 
                 success: true,
@@ -706,10 +553,7 @@ app.post(
             );
 
             res.status(500).json({
-
-                error:
-                    "Failed to submit quiz."
-
+                error: "Failed to submit quiz."
             });
 
         }
@@ -743,18 +587,11 @@ app.get(
             if (!quiz) {
 
                 return res.status(404).json({
-
-                    error:
-                        "Quiz not found."
-
+                    error: "Quiz not found."
                 });
 
             }
 
-
-            /*
-            ---------- ATTEMPTS ----------
-            */
 
             const attempts =
                 db.prepare(`
@@ -779,16 +616,11 @@ app.get(
                 );
 
 
-            /*
-            ---------- STATISTICS ----------
-            */
-
             const statistics =
                 db.prepare(`
                     SELECT
 
-                        COUNT(*)
-                            AS attempts,
+                        COUNT(*) AS attempts,
 
                         AVG(accuracy)
                             AS average_accuracy,
@@ -806,10 +638,6 @@ app.get(
                     quiz.id
                 );
 
-
-            /*
-            ---------- RESPONSE ----------
-            */
 
             res.json({
 
@@ -850,10 +678,7 @@ app.get(
             );
 
             res.status(500).json({
-
-                error:
-                    "Could not load dashboard."
-
+                error: "Could not load dashboard."
             });
 
         }
@@ -888,9 +713,7 @@ app.get(
 
                 return res
                     .status(404)
-                    .send(
-                        "Quiz not found"
-                    );
+                    .send("Quiz not found");
 
             }
 
@@ -898,7 +721,6 @@ app.get(
             const attempts =
                 db.prepare(`
                     SELECT
-
                         participant_name,
                         score,
                         total,
@@ -921,49 +743,43 @@ app.get(
                 "Participant,Score,Total,Accuracy,Time Taken,Feedback,Submitted At\n";
 
 
-            attempts.forEach(
-                a => {
+            attempts.forEach(a => {
 
-                    const row = [
+                const row = [
 
-                        a.participant_name,
+                    a.participant_name,
 
-                        a.score,
+                    a.score,
 
-                        a.total,
+                    a.total,
 
-                        a.accuracy + "%",
+                    a.accuracy + "%",
 
-                        formatSeconds(
-                            a.time_taken
-                        ),
+                    formatSeconds(
+                        a.time_taken
+                    ),
 
-                        a.feedback,
+                    a.feedback,
 
-                        a.submitted_at
+                    a.submitted_at
 
-                    ].map(
-                        value => {
+                ].map(value => {
 
-                            return (
-                                `"${String(
-                                    value ?? ""
-                                ).replace(
-                                    /"/g,
-                                    '""'
-                                )}"`
-                            );
+                    return `"${String(
+                        value ?? ""
+                    ).replace(
+                        /"/g,
+                        '""'
+                    )}"`;
 
-                        }
-                    );
+                });
 
 
-                    csv +=
-                        row.join(",") +
-                        "\n";
+                csv +=
+                    row.join(",") +
+                    "\n";
 
-                }
-            );
+            });
 
 
             res.setHeader(
@@ -1024,19 +840,11 @@ app.delete(
             if (!quiz) {
 
                 return res.status(404).json({
-
-                    error:
-                        "Quiz not found."
-
+                    error: "Quiz not found."
                 });
 
             }
 
-
-            /*
-            Delete attempts first because
-            they reference the quiz.
-            */
 
             db.prepare(`
                 DELETE FROM attempts
@@ -1055,10 +863,7 @@ app.delete(
 
 
             res.json({
-
-                success:
-                    true
-
+                success: true
             });
 
         }
@@ -1071,10 +876,7 @@ app.delete(
             );
 
             res.status(500).json({
-
-                error:
-                    "Could not delete quiz."
-
+                error: "Could not delete quiz."
             });
 
         }
