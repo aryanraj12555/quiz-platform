@@ -817,7 +817,7 @@ function calculateUnanswered(
 ) {
 
     const questions =
-        dashboardData.questions;
+        dashboardData.quiz.questions;
 
 
     let unanswered = 0;
@@ -860,7 +860,7 @@ function renderQuestionReview(
 ) {
 
     const questions =
-        dashboardData.questions;
+        dashboardData.quiz.questions;
 
 
     return questions.map(
